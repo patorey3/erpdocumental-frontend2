@@ -34,6 +34,10 @@ export function table(theme: Theme) {
       styleOverrides: {
         root: {
           borderBottomStyle: 'dashed',
+          
+        },
+        body: {
+          fontSize: 12,
         },
         head: {
           fontSize: 14,

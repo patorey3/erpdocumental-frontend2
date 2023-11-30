@@ -1,25 +1,24 @@
 // import Iconify from 'src/components/iconify';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import {
   Table,
-  TableRow,
-  MenuItem,
   Container,
-  TableCell,
   TableBody,
-  IconButton,
   TableContainer,
 } from '@mui/material';
 
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
-import { usePopover } from 'src/components/custom-popover';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+import { useLocalStorage } from 'src/hooks/use-local-storage';
+
 import { useSettingsContext } from 'src/components/settings';
-import CustomPopover from 'src/components/custom-popover/custom-popover';
 import { useTable, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
 
 import { IPurchase } from 'src/types/purchases';
+
+import SriPurchaseTableRow from './sri-purchase-table-row';
 
 const TABLE_HEAD = [
   { id: '', label: '#', width: 88 },
@@ -37,21 +36,39 @@ type Props = {
   purchases: IPurchase[];
 };
 
+/* const handleEditRow = ( row: IPurchase) => {
+  console.log('row',row);
+} */
 
+const STORAGE_KEY = 'sri_purchase';
+const initialDocState = { sri_purchase: {} };
 
 export default function SriPurchaseList({ purchases }: Props) {
-  console.log('docs purchases', purchases);
+  const router = useRouter();
+  const { update: updatedocSri } = useLocalStorage(STORAGE_KEY, initialDocState);
+
 
   const settings = useSettingsContext();
   const table = useTable({ defaultRowsPerPage: 10, defaultDense: true });
-  const popover = usePopover();
   const [tableData, setTableData] = useState<IPurchase[]>(purchases);
-
- 
   useEffect(() => {
     setTableData(purchases);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [purchases]);
+
+  const handleSriPurchaseEdit = (purchase: IPurchase) => {
+    console.log(purchase);
+    updatedocSri('sri_purchase',purchase);
+    handleEditRow();
+  }
+
+  const handleEditRow = useCallback(
+    () => {
+      router.push(paths.dashboard.utils.edit);
+    },
+    [router]
+  );
+
 
   return (
     <Container maxWidth={!settings.themeStretch ? false : 'lg'}>
@@ -72,65 +89,13 @@ export default function SriPurchaseList({ purchases }: Props) {
                 table.page * table.rowsPerPage + table.rowsPerPage
               )
               .map((row, index) => (
-                <>
-                <TableRow hover key={`${row.invoiceId}-${index}`}>
-                  <TableCell>{table.page * 10 + index + 1}</TableCell>
-                  <TableCell>
-                    <Label
-                      variant="soft"
-                      color={
-                        (row.documentId === 0 && 'warning') ||
-                        (row.documentId !== 0 && 'success') ||
-                        'default'
-                      }
-                    >
-                      {row.documentId !== 0 ? 'Guardado' : 'No Guardado'}
-                    </Label>
-                  </TableCell>
-                  <TableCell>{row.documentId}</TableCell>
-                  <TableCell>{`${row.sriSerieNumber}-${row.referenceNumber}`}</TableCell>
-                  <TableCell>{row.partner.cC_RUC_DNI}</TableCell>
-                  <TableCell>{row.partner.name}</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>
-                    {Number(row.total).toFixed(2)}
-                  </TableCell>
-                  <TableCell>Factura</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      color={popover.open ? 'primary' : 'default'}
-                      onClick={popover.onOpen}
-                    >
-                      <Iconify icon="eva:more-vertical-fill" />
-                    </IconButton>
-                  </TableCell>                  
-                </TableRow>
-                                  <CustomPopover
-                                  open={popover.open}
-                                  onClose={popover.onClose}
-                                  arrow="right-top"
-                                  sx={{ width: 140 }}
-                                >
-                                  <MenuItem
-                                    onClick={() => {
-                                      // onViewRow();
-                                      popover.onClose();
-                                    }}
-                                  >
-                                    <Iconify icon="solar:eye-bold" />
-                                    View
-                                  </MenuItem>
-            
-                                  <MenuItem
-                                    onClick={() => {
-                                      // onEditRow();
-                                      popover.onClose();
-                                    }}
-                                  >
-                                    <Iconify icon="solar:pen-bold" />
-                                    Edit 
-                                  </MenuItem>
-                                </CustomPopover>
-                </>
+                <SriPurchaseTableRow
+                key={`${row.sriSerieNumber}-${row.referenceNumber}`}
+                row={row}
+                rowNumber={table.page*10 + index + 1}
+                onEditRow={() => handleSriPurchaseEdit(row)}
+                onViewRow={() => handleSriPurchaseEdit(row)}
+              />
               ))}
           </TableBody>
         </Table>

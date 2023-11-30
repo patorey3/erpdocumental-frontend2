@@ -53,6 +53,7 @@ const TourEditPage = lazy(() => import('src/pages/dashboard/tour/edit'));
 // UTILS
 const SriPage = lazy(() => import('src/pages/dashboard/utils/list'));
 const SriNewConsultPage = lazy(() => import('src/pages/dashboard/utils/new'));
+const SriEditPurchasePage = lazy(() => import('src/pages/dashboard/utils/edit'));
 // FILE MANAGER
 const FileManagerPage = lazy(() => import('src/pages/dashboard/file-manager'));
 // APP
@@ -160,7 +161,8 @@ export const dashboardRoutes = [
         path: 'utils',
         children: [
           { element: <SriPage />, index: true },
-          { path: 'new', element: <SriNewConsultPage /> },          
+          { path: 'new', element: <SriNewConsultPage /> },      
+          { path: 'edit', element: <SriEditPurchasePage /> },                    
         ],
       },
       { path: 'file-manager', element: <FileManagerPage /> },

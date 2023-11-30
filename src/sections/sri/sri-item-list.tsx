@@ -3,51 +3,42 @@ import { useState, useEffect } from 'react';
 
 import {
   Table,
-  TableRow,
-  MenuItem,
   Container,
-  TableCell,
   TableBody,
-  IconButton,
   TableContainer,
 } from '@mui/material';
 
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
-import { usePopover } from 'src/components/custom-popover';
 import { useSettingsContext } from 'src/components/settings';
-import CustomPopover from 'src/components/custom-popover/custom-popover';
 import { useTable, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
 
-import { IPurchase } from 'src/types/purchases';
+import { IItemToCreate } from 'src/types/purchases';
+
+import SriItemsTableRow from './sri-items-table-row';
 
 const TABLE_HEAD = [
   { id: '', label: '#', width: 88 },
-  { id: '', label: 'Estado' },
-  { id: '', label: 'Familia', width: 160 },
-  { id: '', label: 'Nro de Comprobante', width: 250 },
+  { id: '', label: 'Barcode (Interno)' },
+  { id: '', label: 'Descripción (Interno)', width: 160 },
   { id: '', label: 'RUC/Cédula', width: 160 },
   { id: '', label: 'Razón Social', width: 160 },
-  { id: '', label: 'Total', width: 140 },
-  { id: '', label: 'Tipo Comprobante', width: 110 },
+  { id: '', label: 'Código Consultado', width: 250 },
+  { id: '', label: 'Descripción Consultado', width: 140 },
   { id: '', width: 100 },
 ];
 
 type Props = {
-  purchases: IPurchase[];
+  items: IItemToCreate[];
 };
 
-export default function SriItemList({ purchases }: Props) {
-  console.log('docs', purchases);
+export default function SriItemList({ items }: Props) {
   const settings = useSettingsContext();
-  const [tableData, setTableData] = useState<IPurchase[]>(purchases);
+  const [tableData, setTableData] = useState<IItemToCreate[]>(items);
   const table = useTable({ defaultRowsPerPage: 10, defaultDense: true });
-  const popover = usePopover();
 
   useEffect(() => {
-    setTableData(purchases);
+    setTableData(items);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [items]);
 
   return (
     <Container maxWidth={!settings.themeStretch ? false : 'lg'}>
@@ -68,64 +59,13 @@ export default function SriItemList({ purchases }: Props) {
                 table.page * table.rowsPerPage + table.rowsPerPage
               )
               .map((row, index) => (
-                <TableRow hover key={index}>
-                  <TableCell>{table.page * 10 + index + 1}</TableCell>
-                  <TableCell>
-                    <Label
-                      variant="soft"
-                      color={
-                        (row.documentId === 0 && 'warning') ||
-                        (row.documentId !== 0 && 'success') ||
-                        'default'
-                      }
-                    >
-                      {row.documentId !== 0 ? 'Guardado' : 'No Guardado'}
-                    </Label>
-                    <CustomPopover
-                    open={popover.open}
-                    onClose={popover.onClose}
-                    arrow="right-top"
-                    sx={{ width: 140 }}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        // onViewRow();
-                        popover.onClose();
-                      }}
-                    >
-                      <Iconify icon="solar:eye-bold" />
-                      View
-                    </MenuItem>
-
-                    <MenuItem
-                      disabled={row.documentId === 0}
-                      onClick={() => {
-                        // onEditRow();
-                        popover.onClose();
-                      }}
-                    >
-                      <Iconify icon="solar:pen-bold" />
-                      Edit {row.documentId}
-                    </MenuItem>
-                  </CustomPopover>
-                  </TableCell>
-                  <TableCell>{row.documentId}</TableCell>
-                  <TableCell>{`${row.sriSerieNumber}-${row.referenceNumber}`}</TableCell>
-                  <TableCell>{row.partner.cC_RUC_DNI}</TableCell>
-                  <TableCell>{row.partner.name}</TableCell>
-                  <TableCell style={{ textAlign: 'right' }}>
-                    {Number(row.total).toFixed(2)}
-                  </TableCell>
-                  <TableCell>Factura</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      color={popover.open ? 'primary' : 'default'}
-                      onClick={popover.onOpen}
-                    >
-                      <Iconify icon="eva:more-vertical-fill" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+                <SriItemsTableRow 
+                key={`${table.page}*10+${index}+1`}
+                row={row}
+                rowNumber={table.page*10 + index + 1}
+                onLinkRow={() => undefined}
+                onContactRow={() => undefined}
+              />
               ))}
           </TableBody>
         </Table>

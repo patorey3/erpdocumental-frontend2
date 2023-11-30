@@ -179,8 +179,8 @@ export const paths = {
     utils: {
       root: `${ROOTS.DASHBOARD}/utils`,
       new: `${ROOTS.DASHBOARD}/utils/new`,
-      // details: (id: string) => `${ROOTS.DASHBOARD}/tour/${id}`,
-      // edit: (id: string) => `${ROOTS.DASHBOARD}/tour/${id}/edit`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/utils/${id}`,
+      edit: `${ROOTS.DASHBOARD}/utils/edit`,
       // demo: {
       //   details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
       //   edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,

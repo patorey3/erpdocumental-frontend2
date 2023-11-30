@@ -13,11 +13,11 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { LoadingScreen } from 'src/components/loading-screen';
 
 import { IJobsItem } from 'src/types/transaction';
 
 import SriDocList from './sri-doc-list';
-// import SriDocList from './sri-doc-list';
 import { useJobTransactions } from './hook/useJobTransaction';
 
 // ----------------------------------------------------------------------
@@ -125,6 +125,7 @@ export default function SriTableRow({
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
         <Collapse in={open} timeout="auto" unmountOnExit>
+          {query_job.isLoading && <LoadingScreen />}
           <SriDocList docs={docs}/>
         </Collapse>
 

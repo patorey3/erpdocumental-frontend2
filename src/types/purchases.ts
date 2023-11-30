@@ -112,3 +112,14 @@ export type IPurchase = {
   allowEdit: boolean;
   accountableStatus: string;
 };
+
+export interface IItemToCreate {
+  partnerId: number;
+  cC_RUC_DNI: string;
+  name: string;
+  itemId: number;
+  itemName: string;
+  itemBarCode: string;
+  productCode: string;
+  description: string;
+}
