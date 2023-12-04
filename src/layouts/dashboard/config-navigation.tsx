@@ -140,10 +140,10 @@ export function useNavData() {
           // INVOICE COMPRAS
           {
             title: t('purchases'),
-            path: paths.dashboard.invoice.root,
+            path: paths.dashboard.purchase.root,
             icon: ICONS.invoice,
             children: [
-              { title: t('purchases_register'), path: paths.dashboard.invoice.root },
+              { title: t('purchases_register'), path: paths.dashboard.purchase.root },
               {
                 title: t('purchases_request'),
                 path: paths.dashboard.invoice.demo.details,

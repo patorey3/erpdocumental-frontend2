@@ -5,7 +5,7 @@ import { getAllDocumentModelType, getCatalogItemCollectionRQ } from 'src/api/cat
 const key = 'doc-catalog-list';
 const key_item_collection = 'catalog-itemcollection';
 
-export const useListDocCatalog = (invoiceType) =>
+export const useListDocCatalog = (invoiceType: string) =>
   useQuery({
     queryKey: [key, invoiceType],
     queryFn: getAllDocumentModelType,

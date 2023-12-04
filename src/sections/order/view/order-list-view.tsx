@@ -217,7 +217,6 @@ export default function OrderListView() {
               />
             ))}
           </Tabs>
-
           <OrderTableToolbar
             filters={filters}
             onFilters={handleFilters}

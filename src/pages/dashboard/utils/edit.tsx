@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoadingButton } from '@mui/lab';
 import { styled } from '@mui/material/styles';
 import { Box, Stack, Container } from '@mui/system';
-import { Card, Grid, Table, MenuItem, TableRow, TableBody, TableCell, TableHead, Typography, TableContainer } from '@mui/material';
+import { Grid, Table, MenuItem, TableRow, TableBody, TableCell, TableHead, Typography, TableContainer } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 
@@ -45,7 +45,6 @@ export default function UtilEditPage() {
   const document = localStorageGetItem('sri_purchase');
   const objDocument = JSON.parse(document ?? '');
   const sriDocument: IPurchase = objDocument.sri_purchase;
-
   const hasItemToCreate = sriDocument.details.findIndex((it) => it.id ===0) >= 0;
 
   const objcatalog = JSON.parse(localStorageGetItem('doc-catalog') ?? '');
@@ -85,6 +84,7 @@ export default function UtilEditPage() {
     [sriDocument]
   );
 
+
   const methods = useForm({
     resolver: yupResolver(DocumentSchema),
     defaultValues,
@@ -111,27 +111,17 @@ export default function UtilEditPage() {
       //  reset();
       // enqueueSnackbar(currentProduct ? 'Update success!' : 'Create success!');
       // router.push(paths.dashboard.product.root);
-      console.log(values.sriSerieNumber);
-      console.info('DATA', data);
       setValue('sriSerieNumber', values.sriSerieNumber);
     } catch (error) {
-      console.error(error);
       enqueueSnackbar(error);
     }
   });
-  /*
-  useEffect(() => {
-    if (sriDocument) {
-      reset(defaultValues);
-    }
-  }, [sriDocument, defaultValues, reset]); */
-console.log('Taxes',sriDocument.details[0].taxDetails )
+
+  
 const renderTaxesByItem = (taxDetail : ITaxDetail[]) => {
   // eslint-disable-next-line no-return-assign
   const total = taxDetail.reduce( (acum, curr) => acum += curr.taxAmount ,0) ?? 0;
   return total;
-  // subtotal: detailPurchaseArray.map(t => Number(t.subtotal)).reduce((acc, value) => acc + value, 0),
-
 }
 
 const renderTotal = (
@@ -151,7 +141,7 @@ const renderTotal = (
     <StyledTableRow>
       <TableCell colSpan={6} />
       <TableCell sx={{ color: 'text.secondary' }}>Impuestos</TableCell>
-      <TableCell width={120}>{fCurrency(sriDocument.taxAmount)}</TableCell>
+      <TableCell width={120}>{fCurrency(Number(sriDocument.taxAmount))  }</TableCell>
     </StyledTableRow>
 
     <StyledTableRow>
@@ -165,8 +155,8 @@ const renderTotal = (
 );
   const renderActions = (
     <>
-      {mdUp && <Grid md={4} />}
-      <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
+      {mdUp && <Grid md={12} />}
+      <Grid xs={12} md={8} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '15px' }}>
         <LoadingButton
           type="submit"
           variant="contained"
@@ -202,23 +192,21 @@ const renderTotal = (
             },
           ]}
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 1 },
           }}
         />
         <FormProvider methods={methods} onSubmit={onSubmit}>
-          <Grid container spacing={3}>
+          <Grid container >
             <Grid item md={12}>
               <Stack sx={{ width: 1 }}>
                 <Typography variant="h6" sx={{ mb: 0.5 }}>
                   Información de Contacto:
                 </Typography>
               </Stack>
-              <Card>
                 <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 3 }}>
                   <RHFTextField disabled name="cC_RUC_DNI" label="RUC/Cédula" />
                   <RHFTextField disabled name="name" label="Razón Social" value={values.name} />
                 </Stack>
-              </Card>
             </Grid>
             <Grid item md={12}>
               <Stack sx={{ width: 1 }}>
@@ -226,7 +214,6 @@ const renderTotal = (
                   Información de Comprobante:
                 </Typography>
               </Stack>
-              <Card>
                 <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 1 }}>
                   <RHFTextField disabled name="sriSerieNumber" label="Serie" />
 
@@ -239,6 +226,7 @@ const renderTotal = (
 
                   <RHFSelect
                     fullWidth
+                    size='small'
                     name="documentModelId"
                     label="Familia de Documento"
                     InputLabelProps={{ shrink: true }}
@@ -261,7 +249,6 @@ const renderTotal = (
                 <RHFTextField disabled name="taxAmount" label="Impuesto" />
                 <RHFTextField disabled name="total" label="Total" />
                 </Stack>
-              </Card>
             </Grid>
           </Grid>
           {renderActions}
@@ -291,20 +278,20 @@ const renderTotal = (
                 <TableCell>{index + 1}</TableCell>
 
                 <TableCell>
-                  <Box sx={{ maxWidth: 250 }}>
+                  <Box sx={{ width: 200 }}>
                     <Typography variant="subtitle2">BarCode: {row.productCode}</Typography>
 
                     <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                      Descripción: {row.description}
+                      {row.description}
                     </Typography>
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ maxWidth: 250 }}>
+                  <Box sx={{ width: 200 }}>
                     <Typography variant="subtitle2">Código: {row.itemBarCode}</Typography>
 
                     <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                      Descripción: {row.itemName}
+                      {row.itemName}
                     </Typography>
                   </Box>
                 </TableCell>

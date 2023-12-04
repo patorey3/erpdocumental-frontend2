@@ -19,6 +19,7 @@ export default function RHFTextField({ name, helperText, type, ...other }: Props
         <TextField
           {...field}
           fullWidth
+          size="small"
           type={type}
           value={type === 'number' && field.value === 0 ? '' : field.value}
           onChange={(event) => {

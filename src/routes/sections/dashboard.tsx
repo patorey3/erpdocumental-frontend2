@@ -54,6 +54,12 @@ const TourEditPage = lazy(() => import('src/pages/dashboard/tour/edit'));
 const SriPage = lazy(() => import('src/pages/dashboard/utils/list'));
 const SriNewConsultPage = lazy(() => import('src/pages/dashboard/utils/new'));
 const SriEditPurchasePage = lazy(() => import('src/pages/dashboard/utils/edit'));
+// PURCHASE
+const PurchaseListPage = lazy(() => import('src/pages/dashboard/purchase/list'));
+const PurchaseCreatePage = lazy(() => import('src/pages/dashboard/purchase/new'));
+const PurchaseEditPage = lazy(() => import('src/pages/dashboard/purchase/edit'));
+
+
 // FILE MANAGER
 const FileManagerPage = lazy(() => import('src/pages/dashboard/file-manager'));
 // APP
@@ -163,6 +169,16 @@ export const dashboardRoutes = [
           { element: <SriPage />, index: true },
           { path: 'new', element: <SriNewConsultPage /> },      
           { path: 'edit', element: <SriEditPurchasePage /> },                    
+        ],
+      },
+      {
+        path: 'purchase',
+        children: [
+          { element: <PurchaseListPage />, index: true },
+          { path: 'new', element: <PurchaseCreatePage /> },      
+          { path: ':id/edit', element: <PurchaseEditPage /> },      
+
+          // { path: 'edit', element: <SriEditPurchasePage /> },                    
         ],
       },
       { path: 'file-manager', element: <FileManagerPage /> },

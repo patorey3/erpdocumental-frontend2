@@ -186,5 +186,15 @@ export const paths = {
       //   edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
       // },
     },
+    purchase: {
+      root: `${ROOTS.DASHBOARD}/purchase`,
+      new: `${ROOTS.DASHBOARD}/purchase/new`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/purchase/${id}/edit`,
+      // details: (id: string) => `${ROOTS.DASHBOARD}/utils/${id}`,
+      // demo: {
+      //   details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
+      //   edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
+      // },
+    },
   },
 };

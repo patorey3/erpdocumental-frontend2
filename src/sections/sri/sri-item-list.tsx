@@ -8,37 +8,70 @@ import {
   TableContainer,
 } from '@mui/material';
 
+import { useBoolean } from 'src/hooks/use-boolean';
+
 import { useSettingsContext } from 'src/components/settings';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
 
 import { IItemToCreate } from 'src/types/purchases';
 
+import SriRelatedItems from './sri-related-items';
 import SriItemsTableRow from './sri-items-table-row';
 
 const TABLE_HEAD = [
   { id: '', label: '#', width: 88 },
-  { id: '', label: 'Barcode (Interno)' },
-  { id: '', label: 'Descripción (Interno)', width: 160 },
+  { id: '', label: 'Producto (Interno)' },
   { id: '', label: 'RUC/Cédula', width: 160 },
   { id: '', label: 'Razón Social', width: 160 },
-  { id: '', label: 'Código Consultado', width: 250 },
-  { id: '', label: 'Descripción Consultado', width: 140 },
+  { id: '', label: 'Producto Consultado', width: 250 },
   { id: '', width: 100 },
 ];
 
 type Props = {
   items: IItemToCreate[];
+  itemHasChanged: (item: IItemToCreate) => void;
+
 };
 
-export default function SriItemList({ items }: Props) {
+export default function SriItemList({ items, itemHasChanged }: Props) {
+  const [itemState, setItemState] = useState<IItemToCreate[]>([]);
   const settings = useSettingsContext();
   const [tableData, setTableData] = useState<IItemToCreate[]>(items);
+  const [itemToRelated, setItemToRelated] = useState<IItemToCreate|undefined>(undefined);
+
   const table = useTable({ defaultRowsPerPage: 10, defaultDense: true });
+  const confirm = useBoolean();
+
+  const handleLinkItems = (row: IItemToCreate) => {
+    setItemToRelated(row);
+    confirm.onTrue();
+  }
+
+  const setItemTable = () =>{
+    const newItems = itemState.filter((it) => it.itemId === 0);
+    const changedItem = itemState.filter((it) => it.itemId !== 0);
+    setTableData(newItems);
+    itemHasChanged(changedItem[0])
+  } 
 
   useEffect(() => {
-    setTableData(items);
+    setItemState(items);
+    console.log('itemsitemsitems',items)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
+
+  useEffect(() => {
+    console.log('tableData')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableData]);
+  
+
+  useEffect(() => {
+    setTableData(itemState);
+    console.log('itemState',itemState)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemState]);
 
   return (
     <Container maxWidth={!settings.themeStretch ? false : 'lg'}>
@@ -63,9 +96,9 @@ export default function SriItemList({ items }: Props) {
                 key={`${table.page}*10+${index}+1`}
                 row={row}
                 rowNumber={table.page*10 + index + 1}
-                onLinkRow={() => undefined}
+                onLinkRow={() => handleLinkItems(row)}
                 onContactRow={() => undefined}
-              />
+              />              
               ))}
           </TableBody>
         </Table>
@@ -79,6 +112,16 @@ export default function SriItemList({ items }: Props) {
         //
         dense={table.dense}
         onChangeDense={table.onChangeDense}
+      />
+            <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        title="Relacionar Items"
+        maxWidth='lg'
+        content={
+          <SriRelatedItems item={itemToRelated} onClose={confirm.onFalse} setItemTable= {setItemTable}/>
+        }
+        action={null}
       />
     </Container>
   );

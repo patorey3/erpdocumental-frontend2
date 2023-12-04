@@ -1,6 +1,8 @@
+
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+import { Box, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 
 import Iconify from 'src/components/iconify';
@@ -18,28 +20,42 @@ type Props = {
 };
 
 export default function SriItemsTableRow({ row, onLinkRow, onContactRow, rowNumber }: Props) {
-  const { productCode, description, cC_RUC_DNI, name, itemBarCode, itemName } = row;
-
+  const { productCode, description, cC_RUC_DNI, name, itemId, itemBarCode, itemName } = row;
   const popover = usePopover();
-
+  
   return (
     <>
       <TableRow hover>
         <TableCell>{rowNumber}</TableCell>
+        <TableCell>
+          <Box sx={{ width: 200 }}>
+            <Typography variant="subtitle2">BarCode: {itemBarCode}</Typography>
+            <Typography style={{ display: 'none' }} variant="subtitle2">
+              BarCode: {itemId}
+            </Typography>
 
-        <TableCell>{productCode}</TableCell>
-        <TableCell>{description}</TableCell>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+              {itemName}
+            </Typography>
+          </Box>
+        </TableCell>
         <TableCell>{cC_RUC_DNI}</TableCell>
         <TableCell>{name}</TableCell>
-        <TableCell>{itemBarCode}</TableCell>
-        <TableCell>{itemName}</TableCell>
+        <TableCell>
+          <Box sx={{ width: 200 }}>
+            <Typography variant="subtitle2">BarCode: {productCode}</Typography>
+
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+              {description}
+            </Typography>
+          </Box>
+        </TableCell>
         <TableCell align="right">
           <IconButton color={popover.open ? 'primary' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
       </TableRow>
-
       <CustomPopover
         open={popover.open}
         onClose={popover.onClose}

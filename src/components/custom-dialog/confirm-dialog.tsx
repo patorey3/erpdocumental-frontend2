@@ -17,7 +17,7 @@ export default function ConfirmDialog({
   ...other
 }: ConfirmDialogProps) {
   return (
-    <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
+    <Dialog fullWidth open={open} onClose={onClose} {...other}>
       <DialogTitle sx={{ pb: 2 }}>{title}</DialogTitle>
 
       {content && <DialogContent sx={{ typography: 'body2' }}> {content} </DialogContent>}
@@ -26,7 +26,7 @@ export default function ConfirmDialog({
         {action}
 
         <Button variant="outlined" color="inherit" onClick={onClose}>
-          Cancel
+          Cancelar
         </Button>
       </DialogActions>
     </Dialog>

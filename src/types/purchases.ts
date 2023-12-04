@@ -94,7 +94,7 @@ export type IPurchase = {
   partnerId: number;
   transactionDate: string | null;
   created: string | null;
-  description: null;
+  description: string | null;
   sriSerieNumber: string | null;
   referenceNumber: string | null;
   sriAuthorization: string | null;

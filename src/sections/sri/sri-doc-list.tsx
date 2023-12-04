@@ -74,11 +74,23 @@ export default function SriDocList({
 
     useEffect(() => {
       setUnlinkItems(getItemsToCreate(docs));
-      console.log('.............',docs);
    //   setItemsToCreate([])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [docs]);
+
+    const itemHasChanged = ( item: IItemToCreate) =>{
+      const purchasesByContact = docs.filter ((doc) => (doc.partnerId ===item.partnerId && doc.documentId===0));
+      purchasesByContact.forEach((purchase) => {
+        purchase.details.forEach((det) => {
+          if(det.description === item.description){
+            det.itemId = item.itemId;
+            det.itemName = item.itemName;
+            det.itemBarCode = item.itemBarCode;          
+          }
+        })
+      });
+    }
 
     return (
         <Container maxWidth={!settings.themeStretch ? false : 'lg'}>
@@ -97,7 +109,8 @@ export default function SriDocList({
                   <Tab
                     key={tab.value}
                     iconPosition="end"
-                    icon={<Iconify icon={tab.icon} /> }
+                    style={{color:'#1EAAE7'}}
+                    icon={<Iconify icon={tab.icon}  /> }
                     value={tab.value}
                     label={tab.label}
                   />
@@ -107,7 +120,7 @@ export default function SriDocList({
                <SriPurchaseList purchases={docs} />
               </TabPanel>
             <TabPanel value={TABS_OPTIONS[1].value}>
-                <SriItemList items={unlinkItems} />
+                <SriItemList items={unlinkItems} itemHasChanged={itemHasChanged}/>
             </TabPanel>
             </TabContext>
             </Card>
