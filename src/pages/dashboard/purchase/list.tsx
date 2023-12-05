@@ -8,7 +8,7 @@ export default function PurchaseListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Listado de Compras</title>
+        <title> Compras: Listado de Compras</title>
       </Helmet>
       <PurchaseListView />
     </>

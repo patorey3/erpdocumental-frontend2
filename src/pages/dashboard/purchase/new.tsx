@@ -8,7 +8,7 @@ export default function PurchaseCreatePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new invoice</title>
+        <title> Compras: Crear Factura</title>
       </Helmet>
        <PurchaseCreateView /> 
     </>

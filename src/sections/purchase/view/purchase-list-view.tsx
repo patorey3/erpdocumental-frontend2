@@ -14,8 +14,8 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { usePurchases } from 'src/hooks/use-purchase';
-import { useListDocCatalog } from 'src/hooks/use-catalog';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
+import { useListDocCatalog, useCatalogCitiesCollection } from 'src/hooks/use-catalog';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -84,16 +84,25 @@ export default function PurchaseListView() {
 
   const queryCatalog = useListDocCatalog('Purchase');
 
+  const queryCitiesCatalog= useCatalogCitiesCollection();
+
   const queryPurchases = usePurchases(emittedDocument, hasCredit, pageIndex);
 
   const initialCatalogState = { type_docs: [] };
+  const initialCitiesCatalogState = { cities: [] };
 
-  const STORAGE_KEY = 'doc-catalog';
+  const STORAGE_KEY = ['doc-catalog','cities-catalog'];
 
   const { state: docCatalog, update: updateCatalog } = useLocalStorage(
-    STORAGE_KEY,
+    STORAGE_KEY[0],
     initialCatalogState
   );
+  const { state: citiesCatalog, update: updateCitiesCatalog } = useLocalStorage(
+    STORAGE_KEY[1],
+    initialCitiesCatalogState
+  );
+
+  
 
   const [tableData, setTableData] = useState(purchases);
 
@@ -111,6 +120,24 @@ export default function PurchaseListView() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryCatalog.data]);
+
+  useEffect(() => {
+    if (queryCitiesCatalog.isFetched) {
+      console.log('Cities', queryCitiesCatalog.data);
+      const cities = queryCitiesCatalog.data.map((city: any) => ({
+        id: city.id,
+        parentId: city.parentId,
+        name: city.name,
+        level: city.level,
+      }));
+      if (citiesCatalog === initialCitiesCatalogState) {
+        updateCitiesCatalog('cities', cities);
+      } 
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryCitiesCatalog.data]);
+
+  
 
   useEffect(() => {
     if (queryPurchases.isFetched) {

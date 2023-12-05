@@ -123,3 +123,27 @@ export interface IItemToCreate {
   productCode: string;
   description: string;
 }
+
+export type IPurchaseRegister = {
+  id: number;
+  partnerId: number;
+  documentModelId: number;
+  sriSerieNumber: string | null;
+  referenceNumber: string | null;
+  sriAuthorization: string | null;
+  sriIssueDateLimit: string | null;
+  sriPaymentType: string | null;
+  transactionDate: string | null;
+  created: string | null;
+  description: string | null;
+  hasCredit: false;
+  daysForCredit: number;
+  creditDateLimit: string | null;
+  nodeCityId: string | null;
+  subTotal: number;
+  taxAmount: number;
+  total: number;
+  balanceAmount: number;
+  allowEdit: boolean;
+  details: IDetailPurchase[];
+};

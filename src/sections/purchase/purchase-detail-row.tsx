@@ -414,27 +414,37 @@ export default function PurchaseDetailRow({ purchase }: Props) {
               <Stack sx={{ width: 1 }}>
                 <Stack>
                   <Typography variant="subtitle2">Código de Cuenta Contable</Typography>
-                  <Typography variant="body2">{mockPurchaseData.tabHistory.codigo_contable}</Typography>
+                  <Typography variant="body2">
+                    {mockPurchaseData.tabHistory.codigo_contable}
+                  </Typography>
                 </Stack>
                 <Stack>
                   <Typography variant="subtitle2">Valor Inicial de la Compra</Typography>
-                  <Typography variant="body2">${mockPurchaseData.tabHistory.valor_inicial.toFixed(2)}</Typography>
+                  <Typography variant="body2">
+                    ${mockPurchaseData.tabHistory.valor_inicial.toFixed(2)}
+                  </Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
                 <Stack>
                   <Typography variant="subtitle2">Nombre de Cuenta Contable</Typography>
-                  <Typography variant="body2">{mockPurchaseData.tabHistory.nombre_codigo_contable}</Typography>
+                  <Typography variant="body2">
+                    {mockPurchaseData.tabHistory.nombre_codigo_contable}
+                  </Typography>
                 </Stack>
                 <Stack>
                   <Typography variant="subtitle2">Saldo de la Compra</Typography>
-                  <Typography variant="body2">${mockPurchaseData.tabHistory.saldo_compra.toFixed(2)}</Typography>
+                  <Typography variant="body2">
+                    ${mockPurchaseData.tabHistory.saldo_compra.toFixed(2)}
+                  </Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
                 <Stack>
                   <Typography variant="subtitle2">Documento Modelo Relacionado</Typography>
-                  <Typography variant="body2">{mockPurchaseData.tabHistory.doc_relacionado}</Typography>
+                  <Typography variant="body2">
+                    {mockPurchaseData.tabHistory.doc_relacionado}
+                  </Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
@@ -522,116 +532,115 @@ export default function PurchaseDetailRow({ purchase }: Props) {
               </Stack>
             </Stack>
             <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 1200 }}>
-            <TableHead>
-            <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Fecha</TableCell>
-            <TableCell>Código Cuenta</TableCell>
-            <TableCell>Nombre Cuenta</TableCell>
-            <TableCell>Documento Modelo Relacionado</TableCell>
-            <TableCell>Descripción</TableCell>
-            <TableCell>ID Documental </TableCell>
-            <TableCell>Entradas y Salidas de Valor</TableCell>
-            </TableRow>
-            </TableHead>
-            <TableBody>
-              {
-                mockPurchaseData.tabHistory.items.map((item) => (
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Código Cuenta</TableCell>
+                  <TableCell>Nombre Cuenta</TableCell>
+                  <TableCell>Documento Modelo Relacionado</TableCell>
+                  <TableCell>Descripción</TableCell>
+                  <TableCell>ID Documental </TableCell>
+                  <TableCell>Entradas y Salidas de Valor</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {mockPurchaseData.tabHistory.items.map((item) => (
                   <TableRow key={item.id}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell>{format(item.fecha, 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>{item.codigo_contable}</TableCell>
-                      <TableCell>{item.nombre_codigo_contable}</TableCell>
-                      <TableCell>{item.doc_relacionado}</TableCell>
-                      <TableCell>{item.descripción}</TableCell>
-                      <TableCell>{item.id_documental}</TableCell>
-                      <TableCell align='right'>{item.valor}</TableCell>
-
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{format(item.fecha, 'dd/MM/yyyy')}</TableCell>
+                    <TableCell>{item.codigo_contable}</TableCell>
+                    <TableCell>{item.nombre_codigo_contable}</TableCell>
+                    <TableCell>{item.doc_relacionado}</TableCell>
+                    <TableCell>{item.descripción}</TableCell>
+                    <TableCell>{item.id_documental}</TableCell>
+                    <TableCell align="right">{item.valor}</TableCell>
                   </TableRow>
-                ))
-              }
-              <TableRow>
-              <TableCell colSpan={7}><b>SALDO</b></TableCell>
-              <TableCell align='right'><b>0.00</b></TableCell>
-
-              </TableRow>
-            </TableBody>
+                ))}
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <b>SALDO</b>
+                  </TableCell>
+                  <TableCell align="right">
+                    <b>0.00</b>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
             </Table>
           </TabPanel>
           <TabPanel value={TABS_OPTIONS[3].value}>
-          <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 1200 }}>
-            <TableHead>
-            <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Fecha</TableCell>
-            <TableCell>Documento Modelo Relacionado</TableCell>
-            <TableCell>Descripción</TableCell>
-            <TableCell>ID Documental </TableCell>
-            <TableCell>Entradas y Salidas de Valor</TableCell>
-            </TableRow>
-            </TableHead>
-            <TableBody>
-              {
-                mockPurchaseData.tabPayment.items.map((item) => (
+            <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 1200 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Documento Modelo Relacionado</TableCell>
+                  <TableCell>Descripción</TableCell>
+                  <TableCell>ID Documental </TableCell>
+                  <TableCell>Entradas y Salidas de Valor</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {mockPurchaseData.tabPayment.items.map((item) => (
                   <TableRow key={item.id}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell>{format(item.fecha, 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>{item.doc_relacionado}</TableCell>
-                      <TableCell>{item.descripción}</TableCell>
-                      <TableCell>{item.id_documental}</TableCell>
-                      <TableCell align='right'>{item.valor.toFixed(2)}</TableCell>
-
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{format(item.fecha, 'dd/MM/yyyy')}</TableCell>
+                    <TableCell>{item.doc_relacionado}</TableCell>
+                    <TableCell>{item.descripción}</TableCell>
+                    <TableCell>{item.id_documental}</TableCell>
+                    <TableCell align="right">{item.valor.toFixed(2)}</TableCell>
                   </TableRow>
-                ))
-              }
-              <TableRow>
-              <TableCell colSpan={5}><b>SALDO</b></TableCell>
-              <TableCell align='right'><b>{mockPurchaseData.tabPayment.total.toFixed(2)}</b></TableCell>
-
-              </TableRow>
-            </TableBody>
+                ))}
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <b>SALDO</b>
+                  </TableCell>
+                  <TableCell align="right">
+                    <b>{mockPurchaseData.tabPayment.total.toFixed(2)}</b>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
             </Table>
           </TabPanel>
           <TabPanel value={TABS_OPTIONS[4].value}>
-          <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 1200 }}>
-            <TableHead>
-            <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Fecha</TableCell>
-            <TableCell>Contacto</TableCell>
-            <TableCell>ID Documental </TableCell>
-            <TableCell>Estado Contable</TableCell>
-            <TableCell>Estado Contable</TableCell>
-            <TableCell>Estado Registro</TableCell>
-            <TableCell>Valores</TableCell>
-            <TableCell>Acciones</TableCell>
-            </TableRow>
-            </TableHead>
-            <TableBody>
-              {
-                mockPurchaseData.tabDocRelated.map((item) => (
+            <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 1200 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Contacto</TableCell>
+                  <TableCell>ID Documental </TableCell>
+                  <TableCell>Estado Contable</TableCell>
+                  <TableCell>Estado Contable</TableCell>
+                  <TableCell>Estado Registro</TableCell>
+                  <TableCell>Valores</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {mockPurchaseData.tabDocRelated.map((item) => (
                   <TableRow key={item.id}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell>{format(item.fecha, 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>{item.doc_relacionado}</TableCell>
-                      <TableCell>{item.contacto}</TableCell>
-                      <TableCell>{item.id_documental}</TableCell>
-                      <TableCell>{renderEstado(item.estado_contable)}</TableCell>
-                      <TableCell>{item.estado_registro}</TableCell>
-                      <TableCell align='right'>{item.valor}</TableCell>
-                      <TableCell>
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{format(item.fecha, 'dd/MM/yyyy')}</TableCell>
+                    <TableCell>{item.doc_relacionado}</TableCell>
+                    <TableCell>{item.contacto}</TableCell>
+                    <TableCell>{item.id_documental}</TableCell>
+                    <TableCell>{renderEstado(item.estado_contable)}</TableCell>
+                    <TableCell>{item.estado_registro}</TableCell>
+                    <TableCell align="right">{item.valor}</TableCell>
+                    <TableCell>
                       <Tooltip title="Ver Documento Adjunto">
-                      <Iconify
-                            style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
-                            icon="fa6-solid:laptop-file"
-                          />
+                        <Iconify
+                          style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
+                          icon="fa6-solid:laptop-file"
+                        />
                       </Tooltip>
-                      </TableCell>
+                    </TableCell>
                   </TableRow>
-                ))
-              }
-            </TableBody>
-            </Table>          </TabPanel>
+                ))}
+              </TableBody>
+            </Table>{' '}
+          </TabPanel>
         </TabContext>
       </Card>
     </Container>

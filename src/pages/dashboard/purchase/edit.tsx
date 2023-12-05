@@ -15,7 +15,7 @@ export default function PurchaseEditPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Product Edit</title>
+        <title> Compras: Editar Factura</title>
       </Helmet>
 
       <PurchaseEditView id={`${id}`} />
