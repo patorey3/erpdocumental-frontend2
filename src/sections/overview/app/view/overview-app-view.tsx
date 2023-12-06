@@ -28,6 +28,9 @@ import AppCurrentDownload from '../app-current-download';
 import AppTopInstalledCountries from '../app-top-installed-countries';
 
 // ----------------------------------------------------------------------
+const initialCatalogState = { type_docs: [] };
+const initialCitiesCatalogState = { cities: [] };
+const STORAGE_KEY = ['doc-catalog','cities-catalog'];
 
 export default function OverviewAppView() {
   const { user } = useMockedUser();
@@ -44,10 +47,7 @@ export default function OverviewAppView() {
 
   const queryCitiesCatalog= useCatalogCitiesCollection();
 
-  const initialCatalogState = { type_docs: [] };
-  const initialCitiesCatalogState = { cities: [] };
 
-  const STORAGE_KEY = ['doc-catalog','cities-catalog'];
 
   const { state: docCatalog, update: updateCatalog } = useLocalStorage(
     STORAGE_KEY[0],

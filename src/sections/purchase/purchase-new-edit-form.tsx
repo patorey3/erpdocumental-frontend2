@@ -21,6 +21,7 @@ import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form'
 
 import { IPurchase } from 'src/types/purchases';
 
+
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -361,6 +362,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
             <Iconify
               style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
               icon="solar:link-bold"
+              onClick={undefined}
             />
           </Stack>
         </Grid>
@@ -444,18 +446,10 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
       </Typography>
       <Grid container columnSpacing={2}>
         <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField
-            name="sriSerieNumber"
-            label="Serie"
-            value={values.sriSerieNumber}
-          />
+          <RHFTextField name="sriSerieNumber" label="Serie" value={values.sriSerieNumber} />
         </Grid>
         <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField
-            name="referenceNumber"
-            label="Serie"
-            value={values.referenceNumber}
-          />
+          <RHFTextField name="referenceNumber" label="Serie" value={values.referenceNumber} />
         </Grid>
         <Grid item xs={12} sm={4} md={4}>
           <DatePicker
@@ -475,7 +469,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
           />
         </Grid>
       </Grid>
-      <Grid container columnSpacing={2} style={{paddingTop:'25px'}}>
+      <Grid container columnSpacing={2} style={{ paddingTop: '25px' }}>
         <Grid item xs={12} sm={4} md={6}>
           <RHFTextField
             name="sriAuthorization"
@@ -484,12 +478,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
           />
         </Grid>
         <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField
-            disabled
-            name="total"
-            label="Total"
-            value={values.total}
-          />
+          <RHFTextField disabled name="total" label="Total" value={values.total} />
         </Grid>
       </Grid>
       <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
@@ -513,8 +502,8 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
         </Grid>
         <Grid item xs={12} sm={5} md={3}>
           <RHFTextField
-            disabled = {!values.hasCredit}
-            type='number'
+            disabled={!values.hasCredit}
+            type="number"
             name="daysForCredit"
             label="Plazo de Crédito"
             value={values.daysForCredit}
