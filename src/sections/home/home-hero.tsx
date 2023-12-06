@@ -108,6 +108,8 @@ export default function HomeHero() {
 
   const hide = percent > 120;
 
+
+
   const renderDescription = (
     <Stack
       alignItems="center"

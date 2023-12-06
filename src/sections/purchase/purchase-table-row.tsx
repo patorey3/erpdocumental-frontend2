@@ -57,11 +57,13 @@ export default function PurchaseTableRow({
   const popover = usePopover();
 
   const [open, setOpen] = useState(false);
+  console.log('localStorageGetItem',localStorageGetItem('doc-catalog'));
 
-  const catalog = localStorageGetItem('doc-catalog');
-
-  const objCatalog = JSON.parse(catalog ?? '');
-
+    const catalog = JSON.parse(localStorageGetItem('doc-catalog') ?? '{ type_docs: [] }');
+    console.log('catalog',catalog);
+    const objCatalog = catalog;
+ 
+  
   const renderTipoDoc = (id: number | null) => {
     if (id) {
       const indexTypeDoc = objCatalog.type_docs.findIndex((cat: any) => cat.id === id);
@@ -73,6 +75,7 @@ export default function PurchaseTableRow({
   const handleOpenCollapse = () => {
     setOpen(!open);
   };
+ 
 
   
   return (

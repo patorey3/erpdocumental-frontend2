@@ -14,8 +14,8 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { usePurchases } from 'src/hooks/use-purchase';
-import { useLocalStorage } from 'src/hooks/use-local-storage';
-import { useListDocCatalog, useCatalogCitiesCollection } from 'src/hooks/use-catalog';
+
+import { localStorageGetItem } from 'src/utils/storage-available';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -71,7 +71,12 @@ export default function PurchaseListView() {
   
   const [documentModelId, setDocumentModelId] = useState<number>(0);
 
+  
   const [catalogDoc, setCatalogDoc] = useState([]);
+  
+  const objcatalog = JSON.parse(localStorageGetItem('doc-catalog') ?? '');
+  
+  
 
   const router = useRouter();
 
@@ -82,62 +87,10 @@ export default function PurchaseListView() {
 
   const confirm = useBoolean();
 
-  const queryCatalog = useListDocCatalog('Purchase');
-
-  const queryCitiesCatalog= useCatalogCitiesCollection();
-
   const queryPurchases = usePurchases(emittedDocument, hasCredit, pageIndex);
 
-  const initialCatalogState = { type_docs: [] };
-  const initialCitiesCatalogState = { cities: [] };
 
-  const STORAGE_KEY = ['doc-catalog','cities-catalog'];
-
-  const { state: docCatalog, update: updateCatalog } = useLocalStorage(
-    STORAGE_KEY[0],
-    initialCatalogState
-  );
-  const { state: citiesCatalog, update: updateCitiesCatalog } = useLocalStorage(
-    STORAGE_KEY[1],
-    initialCitiesCatalogState
-  );
-
-  
-
-  const [tableData, setTableData] = useState(purchases);
-
-  useEffect(() => {
-    if (queryCatalog.isFetched) {
-      const cat = queryCatalog.data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        accountId: item.accountId,
-      }));
-      setCatalogDoc(cat);
-      if (docCatalog === initialCatalogState) {
-        updateCatalog('type_docs', cat);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryCatalog.data]);
-
-  useEffect(() => {
-    if (queryCitiesCatalog.isFetched) {
-      console.log('Cities', queryCitiesCatalog.data);
-      const cities = queryCitiesCatalog.data.map((city: any) => ({
-        id: city.id,
-        parentId: city.parentId,
-        name: city.name,
-        level: city.level,
-      }));
-      if (citiesCatalog === initialCitiesCatalogState) {
-        updateCitiesCatalog('cities', cities);
-      } 
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryCitiesCatalog.data]);
-
-  
+  const [tableData, setTableData] = useState(purchases);  
 
   useEffect(() => {
     if (queryPurchases.isFetched) {
@@ -179,6 +132,12 @@ export default function PurchaseListView() {
     },
     [router]
   );
+
+  useEffect(() => {
+    setCatalogDoc(objcatalog.type_docs);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  
 
   return (
     <>
@@ -289,7 +248,7 @@ export default function PurchaseListView() {
               </Select>
             </FormControl>            
           </Stack>
-          {queryPurchases.isLoading ? (
+          {(queryPurchases.isLoading ) ? (
         <LoadingScreen />
       ) : (
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
