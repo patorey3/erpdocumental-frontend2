@@ -9,7 +9,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
-import { useListDocCatalog, useCatalogCitiesCollection } from 'src/hooks/use-catalog';
+import { useListDocCatalog, useCatalogTaxCollection, useCatalogCitiesCollection } from 'src/hooks/use-catalog';
 
 import { SeoIllustration } from 'src/assets/illustrations';
 import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled } from 'src/_mock';
@@ -30,7 +30,9 @@ import AppTopInstalledCountries from '../app-top-installed-countries';
 // ----------------------------------------------------------------------
 const initialCatalogState = { type_docs: [] };
 const initialCitiesCatalogState = { cities: [] };
-const STORAGE_KEY = ['doc-catalog','cities-catalog'];
+const initialTaxesCatalogState = { taxes: [] };
+
+const STORAGE_KEY = ['doc-catalog','cities-catalog','taxes-catalog'];
 
 export default function OverviewAppView() {
   const { user } = useMockedUser();
@@ -41,13 +43,16 @@ export default function OverviewAppView() {
 
   const [catalogDoc, setCatalogDoc] = useState([]);
 
+  const [catalogTax, setCatalogTax] = useState([]);
+
+
   const [catalogCities, setCatalogCities] = useState([]);
 
   const queryCatalog = useListDocCatalog('Purchase');
 
   const queryCitiesCatalog= useCatalogCitiesCollection();
 
-
+  const queryTaxCatalog = useCatalogTaxCollection();
 
   const { state: docCatalog, update: updateCatalog } = useLocalStorage(
     STORAGE_KEY[0],
@@ -56,6 +61,10 @@ export default function OverviewAppView() {
   const { state: citiesCatalog, update: updateCitiesCatalog } = useLocalStorage(
     STORAGE_KEY[1],
     initialCitiesCatalogState
+  );
+  const { state: taxesCatalog, update: updateTaxesCatalog } = useLocalStorage(
+    STORAGE_KEY[2],
+    initialTaxesCatalogState
   );
 
   useEffect(() => {
@@ -101,6 +110,25 @@ export default function OverviewAppView() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catalogCities]);
+
+  useEffect(() => {
+    if (queryTaxCatalog.isFetched) {
+      console.log('queryTaxCatalog', queryTaxCatalog.data);
+      setCatalogTax(queryTaxCatalog.data)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryTaxCatalog.data]);
+
+  useEffect(() => {
+    console.log('docCatalog',taxesCatalog);
+
+    if(catalogTax.length > 0){
+      updateTaxesCatalog('taxes', catalogTax);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogTax]);
+
+  
 
 
   return (

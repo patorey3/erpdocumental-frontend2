@@ -254,8 +254,6 @@ export default function InvoiceNewEditDetails() {
                   },
                 }}
               />
-            </Stack>
-
             <Button
               size="small"
               color="error"
@@ -264,6 +262,8 @@ export default function InvoiceNewEditDetails() {
             >
               Remove
             </Button>
+            </Stack>
+
           </Stack>
         ))}
       </Stack>

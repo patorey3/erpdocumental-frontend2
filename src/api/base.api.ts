@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URL = 'http://localhost:7080/api/v1/';
-const BASE_URL = 'https://erpdocumentalapi20230922201704.azurewebsites.net/api/v1/';
+import { BASE_ERP_DOCUMENTAL_API } from 'src/config-global';
+
 export const instance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: BASE_ERP_DOCUMENTAL_API,
 });

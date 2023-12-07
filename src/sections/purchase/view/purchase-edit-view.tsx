@@ -33,8 +33,8 @@ export default function PurchaseEditView({ id }: Props) {
   }, [queryPurchaseById.data]);
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <CustomBreadcrumbs
+    <Container maxWidth={settings.themeStretch ? false : 'lg'} >
+      <CustomBreadcrumbs 
         heading="Editar Factura de Compras"
         links={[
           {
@@ -47,9 +47,6 @@ export default function PurchaseEditView({ id }: Props) {
           },
           { name: currentPurchase?.referenceNumber? `Factura Nro. ${currentPurchase.sriSerieNumber}-${currentPurchase.referenceNumber}` : '' },
         ]}
-        sx={{
-          mb: { xs: 3, md: 5 },
-        }}
       />
        <PurchaseNewEditForm currentPurchase={currentPurchase} /> 
 

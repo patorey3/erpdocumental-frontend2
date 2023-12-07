@@ -4,9 +4,11 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useMemo, useState, useEffect, ChangeEvent } from 'react';
 
 import Stack from '@mui/material/Stack';
+import { alpha } from '@mui/material/styles';
+import { TabPanel, TabContext } from '@mui/lab';
 import { DatePicker } from '@mui/x-date-pickers';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Grid, Button, MenuItem, Typography } from '@mui/material';
+import { Tab, Grid, Tabs, Button, MenuItem, Typography } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -21,6 +23,7 @@ import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form'
 
 import { IPurchase } from 'src/types/purchases';
 
+import PurchaseDetailForm from './purchase-detail-form';
 
 // ----------------------------------------------------------------------
 
@@ -41,9 +44,23 @@ interface IContactResult {
   address: string;
 }
 
+const TABS_OPTIONS = [
+  { value: 'general', label: 'Datos Encabezado', icon: 'ic:baseline-home' },
+  { value: 'detalle', label: 'Detalle de Items', icon: 'fluent:box-multiple-20-filled' },
+];
 export default function PurchaseNewEditForm({ currentPurchase }: Props) {
   const router = useRouter();
   const [providers, setProviders] = useState<IProviderCatalog[]>([]);
+
+
+
+  const [optionTab, setOptionTab] = useState(TABS_OPTIONS[0]);
+
+  const handleOption = (event: React.SyntheticEvent, newValue: string) => {
+    const selectedOption = TABS_OPTIONS.find((op) => op.value === newValue);
+    setOptionTab(selectedOption ?? TABS_OPTIONS[0]);
+    // setPurchases(docs);
+  };
 
   const loadingSave = useBoolean();
 
@@ -70,7 +87,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
     referenceNumber: Yup.string().required('Número es requerido'),
     sriAuthorization: Yup.string().required('Autorización es requerido'),
     total: Yup.number().min(0.01).required('Total es requerido'),
-
+    details: Yup.array(),    
     // dueDate: Yup.mixed<any>()
     //   .required('Due date is required')
     //   .test(
@@ -110,6 +127,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
       referenceNumber: currentPurchase?.referenceNumber ?? '',
       sriAuthorization: currentPurchase?.sriAuthorization ?? '',
       total: currentPurchase?.total ?? 1,
+      details: currentPurchase?.details ? currentPurchase.details : [],
 
       // createDate: currentPurchase?.createDate || new Date(),
       // dueDate: currentPurchase?.dueDate || null,
@@ -231,7 +249,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
       setValue('sriAuthorization', currentPurchase.sriAuthorization ?? '');
       setValue('nodeCityId', currentPurchase.nodeCityId ?? 'c05010101');
       setValue('total', currentPurchase.total ?? 0);
-
+      setValue('details', currentPurchase.details);
       setProviders([provider]);
     }
 
@@ -256,318 +274,363 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
 
   return (
     <FormProvider methods={methods}>
-      <Typography variant="h6" style={{ paddingBottom: '10px' }}>
-        Información Documental
-      </Typography>
-      <Grid container columnSpacing={2}>
-        <Grid item xs={12} sm={5} md={2}>
-          <Stack>
-            <RHFTextField
-              disabled
-              name="categoria"
-              label="Categoría Documental"
-              defaultValue="COMPRA"
-            />
-          </Stack>
-        </Grid>
-        <Grid item xs={12} sm={5} md={3}>
-          <Stack>
-            <RHFSelect
-              size="small"
-              style={{ width: '100%' }}
-              name="documentModelId"
-              label="Familia de Documento"
-              InputLabelProps={{ shrink: true }}
-              PaperPropsSx={{ textTransform: 'capitalize' }}
-              value={values.documentModelId}
-            >
-              {docCatalog.map((option: any) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </RHFSelect>
-          </Stack>
-        </Grid>
-        <Grid item xs={12} sm={5} md={3}>
-          <Stack>
-            <RHFTextField
-              disabled
-              name="id-documental"
-              label="ID Documental"
-              value={values.documentModelId}
-            />
-          </Stack>
-        </Grid>
-        <Grid item xs={12} sm={4} md={3} style={{ display: 'flex', justifyContent: 'center' }}>
-          <Stack spacing={2} style={{ marginBottom: '15px' }}>
-            <Button
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignContent: 'center',
-                width: '208px',
-                height: '45px',
-                backgroundColor: '#0F8BE3',
-              }}
-              variant="contained"
-            >
-              <Grid container>
-                <Grid
-                  item
-                  xs={3}
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      height: '30px',
-                      borderRadius: '5px',
-                      width: '30px',
-                      backgroundColor: 'white',
-                    }}
-                  >
-                    <Iconify
-                      style={{ width: '50px', color: '#0F8BE3' }}
-                      icon="fa6-solid:laptop-file"
-                    />
-                  </div>
-                </Grid>
-                <Grid
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                  item
-                  xs={9}
-                >
-                  Adjuntar Documento
-                </Grid>
-              </Grid>
-            </Button>
-          </Stack>
-        </Grid>
-        <Grid item xs={12} md={8} sm={10}>
-          <Stack>
-            <RHFTextField name="description" label="Descripción" value={values.description} />
-          </Stack>
-        </Grid>
-      </Grid>
-      <Grid container columnSpacing={2} style={{ paddingTop: '25px' }}>
-        <Grid item xs={12} sm={4} md={3}>
-          <Stack
-            direction="row"
-            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-          >
-            <RHFTextField disabled name="req-document" label="Documento de Requisición" value={1} />
-            <Iconify
-              style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
-              icon="solar:link-bold"
-              onClick={undefined}
-            />
-          </Stack>
-        </Grid>
-        <Grid item xs={12} sm={4} md={3}>
-          <RHFTextField disabled name="sys-user" label="Usuario de Sistema" value="Felipe Vargas" />
-        </Grid>
-        <Grid item xs={12} sm={3} md={3}>
-          <DatePicker
-            label="Fecha de Registro"
-            format="dd/MM/yyyy"
-            value={values.transactionDate}
-            onChange={undefined}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                size: 'small',
-              },
-            }}
-            sx={{
-              maxWidth: { md: 200 },
-            }}
-          />
-        </Grid>
-      </Grid>
-      <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
-        Contacto
-      </Typography>
-      <Grid container columnSpacing={2}>
-        <Grid item xs={12} sm={4} md={4}>
-          <Stack
-            direction="row"
-            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-          >
-            <RHFSelect
-              size="small"
-              style={{ width: '100%' }}
-              name="partnerId"
-              label="Proveedor"
-              InputLabelProps={{ shrink: true }}
-              PaperPropsSx={{ textTransform: 'capitalize' }}
-              value={values.partnerId}
-            >
-              {providers.map((option: any) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </RHFSelect>
-            <Iconify
-              style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
-              icon="tdesign:user-search"
-              onClick={from.onTrue}
-            />
-          </Stack>
-        </Grid>
-        <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField disabled name="cC_RUC_DNI" label="RUC/Cédula" value={values.cC_RUC_DNI} />
-        </Grid>
-        <Grid item xs={12} sm={4} md={3}>
-          <Stack>
-            <RHFSelect
-              size="small"
-              style={{ width: '100%' }}
-              name="nodeCityId"
-              label="Ciudad"
-              InputLabelProps={{ shrink: true }}
-              PaperPropsSx={{ textTransform: 'capitalize' }}
-              value={values.nodeCityId}
-            >
-              {citiesCatalog.map((option: any) => (
-                <MenuItem key={option.id} value={option.id}>
-                  {option.name}
-                </MenuItem>
-              ))}
-            </RHFSelect>
-          </Stack>
-        </Grid>
-      </Grid>
-      <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
-        Información del Comprobante
-      </Typography>
-      <Grid container columnSpacing={2}>
-        <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField name="sriSerieNumber" label="Serie" value={values.sriSerieNumber} />
-        </Grid>
-        <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField name="referenceNumber" label="Serie" value={values.referenceNumber} />
-        </Grid>
-        <Grid item xs={12} sm={4} md={4}>
-          <DatePicker
-            label="Fecha de Comprobante"
-            format="dd/MM/yyyy"
-            value={values.transactionDate}
-            onChange={undefined}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                size: 'small',
-              },
-            }}
-            sx={{
-              maxWidth: { md: 200 },
-            }}
-          />
-        </Grid>
-      </Grid>
-      <Grid container columnSpacing={2} style={{ paddingTop: '25px' }}>
-        <Grid item xs={12} sm={4} md={6}>
-          <RHFTextField
-            name="sriAuthorization"
-            label="Nro de Aotorización"
-            value={values.sriAuthorization}
-          />
-        </Grid>
-        <Grid item xs={12} sm={4} md={4}>
-          <RHFTextField disabled name="total" label="Total" value={values.total} />
-        </Grid>
-      </Grid>
-      <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
-        Información Financiera
-      </Typography>
-      <Grid container columnSpacing={2}>
-        <Grid item xs={12} sm={5} md={4}>
-          <RHFSelect
-            size="small"
-            style={{ width: '100%' }}
-            name="hasCredit"
-            label="Es a Crédito?"
-            InputLabelProps={{ shrink: true }}
-            PaperPropsSx={{ textTransform: 'capitalize' }}
-            onChange={onChangeCredit}
-            value={values.hasCredit}
-          >
-            <MenuItem value={true as any}>SI</MenuItem>
-            <MenuItem value={false as any}>NO</MenuItem>
-          </RHFSelect>
-        </Grid>
-        <Grid item xs={12} sm={5} md={3}>
-          <RHFTextField
-            disabled={!values.hasCredit}
-            type="number"
-            name="daysForCredit"
-            label="Plazo de Crédito"
-            value={values.daysForCredit}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3} md={5}>
-          <DatePicker
-            label="Vencimiento de Pago"
-            format="dd/MM/yyyy"
-            value={values.creditDateLimit}
-            onChange={undefined}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                size: 'small',
-              },
-            }}
-            sx={{
-              maxWidth: { md: 200 },
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} md={8} sm={10}>
-          <Stack style={{ paddingTop: '20px' }}>
-            <RHFTextField
-              name="id-descripcion"
-              label="Nota sobre detalle de Pago"
-              value={values.description}
-            />
-          </Stack>
-        </Grid>
-      </Grid>
-      <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
-        Recepción de Compra
-      </Typography>
-      <Grid container columnSpacing={2}>
-        <Grid item xs={12} sm={5} md={4}>
-          <RHFTextField disabled name="pro-id" label="Sucursal" value={1} />
-        </Grid>
-        <Grid item xs={12} sm={5} md={6}>
-          <RHFTextField name="nota-recepcion" label="Nota Sobre Recepción de Compra" value={1} />
-        </Grid>
-      </Grid>
-      <Stack justifyContent="flex-end" direction="row" spacing={2} sx={{ mt: 3 }}>
-        <LoadingButton
-          color="primary"
-          size="large"
-          variant="outlined"
-          loading={loadingSave.value && isSubmitting}
-          onClick={handleSaveAsDraft}
+      <TabContext value={optionTab.value}>
+        <Tabs
+          value={optionTab.value}
+          onChange={handleOption}
+          sx={{
+            px: 2.5,
+            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+          }}
         >
-          Guardar como Borrador
-        </LoadingButton>
+          {TABS_OPTIONS.map((tab) => (
+            <Tab
+              key={tab.value}
+              iconPosition="end"
+              style={{ color: '#1EAAE7' }}
+              icon={<Iconify icon={tab.icon} />}
+              value={tab.value}
+              label={tab.label}
+            />
+          ))}
+        </Tabs>
+        <TabPanel value={TABS_OPTIONS[0].value}>
+          <Typography variant="h6" style={{ paddingBottom: '10px' }}>
+            Información Documental
+          </Typography>
+          <Grid container columnSpacing={2}>
+            <Grid item xs={12} sm={5} md={2}>
+              <Stack>
+                <RHFTextField
+                  disabled
+                  name="categoria"
+                  label="Categoría Documental"
+                  defaultValue="COMPRA"
+                />
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={5} md={3}>
+              <Stack>
+                <RHFSelect
+                  size="small"
+                  style={{ width: '100%' }}
+                  name="documentModelId"
+                  label="Familia de Documento"
+                  InputLabelProps={{ shrink: true }}
+                  PaperPropsSx={{ textTransform: 'capitalize' }}
+                  value={values.documentModelId}
+                >
+                  {docCatalog.map((option: any) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={5} md={3}>
+              <Stack>
+                <RHFTextField
+                  disabled
+                  name="id-documental"
+                  label="ID Documental"
+                  value={values.documentModelId}
+                />
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={4} md={3} style={{ display: 'flex', justifyContent: 'center' }}>
+              <Stack spacing={2} style={{ marginBottom: '15px' }}>
+                <Button
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignContent: 'center',
+                    width: '208px',
+                    height: '45px',
+                    backgroundColor: '#0F8BE3',
+                  }}
+                  variant="contained"
+                >
+                  <Grid container>
+                    <Grid
+                      item
+                      xs={3}
+                      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          height: '30px',
+                          borderRadius: '5px',
+                          width: '30px',
+                          backgroundColor: 'white',
+                        }}
+                      >
+                        <Iconify
+                          style={{ width: '50px', color: '#0F8BE3' }}
+                          icon="fa6-solid:laptop-file"
+                        />
+                      </div>
+                    </Grid>
+                    <Grid
+                      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                      item
+                      xs={9}
+                    >
+                      Adjuntar Documento
+                    </Grid>
+                  </Grid>
+                </Button>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} md={8} sm={10}>
+              <Stack>
+                <RHFTextField name="description" label="Descripción" value={values.description} />
+              </Stack>
+            </Grid>
+          </Grid>
+          <Grid container columnSpacing={2} style={{ paddingTop: '25px' }}>
+            <Grid item xs={12} sm={4} md={3}>
+              <Stack
+                direction="row"
+                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+              >
+                <RHFTextField
+                  disabled
+                  name="req-document"
+                  label="Documento de Requisición"
+                  value={1}
+                />
+                <Iconify
+                  style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
+                  icon="solar:link-bold"
+                  onClick={undefined}
+                />
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={4} md={3}>
+              <RHFTextField
+                disabled
+                name="sys-user"
+                label="Usuario de Sistema"
+                value="Felipe Vargas"
+              />
+            </Grid>
+            <Grid item xs={12} sm={3} md={3}>
+              <DatePicker
+                label="Fecha de Registro"
+                format="dd/MM/yyyy"
+                value={values.transactionDate}
+                onChange={undefined}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: 'small',
+                  },
+                }}
+                sx={{
+                  maxWidth: { md: 200 },
+                }}
+              />
+            </Grid>
+          </Grid>
+          <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+            Contacto
+          </Typography>
+          <Grid container columnSpacing={2}>
+            <Grid item xs={12} sm={4} md={4}>
+              <Stack
+                direction="row"
+                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+              >
+                <RHFSelect
+                  size="small"
+                  style={{ width: '100%' }}
+                  name="partnerId"
+                  label="Proveedor"
+                  InputLabelProps={{ shrink: true }}
+                  PaperPropsSx={{ textTransform: 'capitalize' }}
+                  value={values.partnerId}
+                >
+                  {providers.map((option: any) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+                <Iconify
+                  style={{ width: '50px', color: '#0F8BE3', cursor: 'pointer' }}
+                  icon="tdesign:user-search"
+                  onClick={from.onTrue}
+                />
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+              <RHFTextField
+                disabled
+                name="cC_RUC_DNI"
+                label="RUC/Cédula"
+                value={values.cC_RUC_DNI}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4} md={3}>
+              <Stack>
+                <RHFSelect
+                  size="small"
+                  style={{ width: '100%' }}
+                  name="nodeCityId"
+                  label="Ciudad"
+                  InputLabelProps={{ shrink: true }}
+                  PaperPropsSx={{ textTransform: 'capitalize' }}
+                  value={values.nodeCityId}
+                >
+                  {citiesCatalog.map((option: any) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </Stack>
+            </Grid>
+          </Grid>
+          <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+            Información del Comprobante
+          </Typography>
+          <Grid container columnSpacing={2}>
+            <Grid item xs={12} sm={4} md={4}>
+              <RHFTextField name="sriSerieNumber" label="Serie" value={values.sriSerieNumber} />
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+              <RHFTextField name="referenceNumber" label="Serie" value={values.referenceNumber} />
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+              <DatePicker
+                label="Fecha de Comprobante"
+                format="dd/MM/yyyy"
+                value={values.transactionDate}
+                onChange={undefined}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: 'small',
+                  },
+                }}
+                sx={{
+                  maxWidth: { md: 200 },
+                }}
+              />
+            </Grid>
+          </Grid>
+          <Grid container columnSpacing={2} style={{ paddingTop: '25px' }}>
+            <Grid item xs={12} sm={4} md={6}>
+              <RHFTextField
+                name="sriAuthorization"
+                label="Nro de Autorización"
+                value={values.sriAuthorization}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+              <RHFTextField disabled name="total" label="Total" value={values.total} />
+            </Grid>
+          </Grid>
+          <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+            Información Financiera
+          </Typography>
+          <Grid container columnSpacing={2}>
+            <Grid item xs={12} sm={5} md={4}>
+              <RHFSelect
+                size="small"
+                style={{ width: '100%' }}
+                name="hasCredit"
+                label="Es a Crédito?"
+                InputLabelProps={{ shrink: true }}
+                PaperPropsSx={{ textTransform: 'capitalize' }}
+                onChange={onChangeCredit}
+                value={values.hasCredit}
+              >
+                <MenuItem value={true as any}>SI</MenuItem>
+                <MenuItem value={false as any}>NO</MenuItem>
+              </RHFSelect>
+            </Grid>
+            <Grid item xs={12} sm={5} md={3}>
+              <RHFTextField
+                disabled={!values.hasCredit}
+                type="number"
+                name="daysForCredit"
+                label="Plazo de Crédito"
+                value={values.daysForCredit}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3} md={5}>
+              <DatePicker
+                label="Vencimiento de Pago"
+                format="dd/MM/yyyy"
+                value={values.creditDateLimit}
+                onChange={undefined}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: 'small',
+                  },
+                }}
+                sx={{
+                  maxWidth: { md: 200 },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={8} sm={10}>
+              <Stack style={{ paddingTop: '20px' }}>
+                <RHFTextField
+                  name="nota-pago"
+                  label="Nota sobre detalle de Pago"
+                  value={values.description}
+                />
+              </Stack>
+            </Grid>
+          </Grid>
+          <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+            Recepción de Compra
+          </Typography>
+          <Grid container columnSpacing={2}>
+            <Grid item xs={12} sm={5} md={4}>
+              <RHFTextField disabled name="pro-id" label="Sucursal" value={1} />
+            </Grid>
+            <Grid item xs={12} sm={5} md={6}>
+              <RHFTextField
+                name="nota-recepcion"
+                label="Nota Sobre Recepción de Compra"
+                value={1}
+              />
+            </Grid>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={TABS_OPTIONS[1].value}>
+          <PurchaseDetailForm />
+          <Stack justifyContent="flex-end" direction="row" spacing={2} sx={{ mt: 3 }}>
+            <LoadingButton
+              color="primary"
+              size="large"
+              variant="outlined"
+              loading={loadingSave.value && isSubmitting}
+              onClick={handleSaveAsDraft}
+            >
+              Guardar como Borrador
+            </LoadingButton>
 
-        <LoadingButton
-          size="large"
-          variant="contained"
-          color="primary"
-          loading={loadingSend.value && isSubmitting}
-          onClick={handleCreateAndSend}
-        >
-          {currentPurchase ? 'Modificar' : 'Crear'} & Emitir
-        </LoadingButton>
-      </Stack>
+            <LoadingButton
+              size="large"
+              variant="contained"
+              color="primary"
+              loading={loadingSend.value && isSubmitting}
+              onClick={handleCreateAndSend}
+            >
+              {currentPurchase ? 'Modificar' : 'Crear'} & Emitir
+            </LoadingButton>
+          </Stack>
+        </TabPanel>
+      </TabContext>
       <ContactListDialog
         title="Contactos"
         open={from.value}

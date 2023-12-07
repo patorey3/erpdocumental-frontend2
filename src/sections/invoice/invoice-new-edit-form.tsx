@@ -100,7 +100,7 @@ export default function InvoiceNewEditForm({ currentInvoice }: Props) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
       loadingSave.onFalse();
-      router.push(paths.dashboard.invoice.root);
+      // router.push(paths.dashboard.invoice.root);
       console.info('DATA', JSON.stringify(data, null, 2));
     } catch (error) {
       console.error(error);

@@ -5,6 +5,7 @@ const itemEndpoint = 'Item/forPurchase';
 const itemCollectioniEndpoint = 'ItemCollection';
 const contactEndpoint = 'Partners';
 const partnerCollectionEndpoint = 'PartnerCollection';
+const taxesCollectionEndpoint = 'TaxesCollection';
 
 export const getAllDocumentModelType = async (queryKey: any) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,6 +18,20 @@ export const getItemsPurchasesByNameNotRelated = async (itemName: string, partne
   const response = await instance.get(
     `${itemEndpoint}?Name=${itemName}&FilterNoRelatedVendorPartnerId=${partnerId}`
   );
+  return response.data.data;
+};
+
+export const getItemsPurchasesByBarCode = async (queryKey: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, barcode] = queryKey.queryKey;
+  const response = await instance.get(`${itemEndpoint}?BarCode=${barcode}`);
+  return response.data.data;
+};
+
+export const getItemsPurchasesByName = async (queryKey: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, name] = queryKey.queryKey;
+  const response = await instance.get(`${itemEndpoint}?Name=${name}`);
   return response.data.data;
 };
 
@@ -41,4 +56,10 @@ export const getContactListRQ = async (queryKey: any) => {
     `${contactEndpoint}?PageIndex=${page}&PageSize=${pageSize}${filter}`
   );
   return response.data;
+};
+
+export const getTaxesCollectionPercentsRQ = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const response = await instance.get(`${taxesCollectionEndpoint}/percents`);
+  return response.data.data;
 };
