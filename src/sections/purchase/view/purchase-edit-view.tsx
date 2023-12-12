@@ -6,7 +6,6 @@ import { paths } from 'src/routes/paths';
 
 import { usePurchaseById } from 'src/hooks/use-purchase';
 
-import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import { IPurchase } from 'src/types/purchases';
@@ -21,7 +20,6 @@ type Props = {
 };
 
 export default function PurchaseEditView({ id }: Props) {
-  const settings = useSettingsContext();
   const queryPurchaseById = usePurchaseById(id);
  const [currentPurchase, setCurrentPurchase] = useState<IPurchase>()
 
@@ -33,7 +31,7 @@ export default function PurchaseEditView({ id }: Props) {
   }, [queryPurchaseById.data]);
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'} >
+    <Container maxWidth={false}>
       <CustomBreadcrumbs 
         heading="Editar Factura de Compras"
         links={[

@@ -17,6 +17,7 @@ import {
   Typography,
   Autocomplete,
   TableContainer,
+  InputAdornment,
 } from '@mui/material';
 
 import { useItemByName, useItemByBarcode } from 'src/hooks/use-catalog';
@@ -27,59 +28,64 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { RHFTextField } from 'src/components/hook-form';
 
-/*
-{
-    "id": "1777ac1d-a5ef-4fe6-ab4a-2ad694e9c9d8",
-    "detailTypeId": "Article",
-    "invoiceId": 68317,
-    "itemId": 2,
-    "itemName": null,
-    "itemBarCode": null,
-    "productCode": null,
-    "description": "Zapatera Modificada",
-    "quantity": 63,
-    "priceAmount": 25,
-    "discountDecimalPercent": 0,
-    "subtotal": 1575,
-    "vatTaxCode": "2",
-    "vatTaxDecimalPercent": 0.12,
-    "documentId": null,
-    "decreaseDocumentId": null,
-    "purchaseRequisitionDocumentId": null,
-    "invoiceDetailsDocument": [],
-    "taxDetails": [
-        {
-            "id": 12877,
-            "taxId": 1,
-            "taxCode": "2",
-            "taxDescription": "IVA",
-            "percentId": 2,
-            "percentCode": "2",
-            "percentDescription": "12%",
-            "percentValue": 0.12,
-            "taxAmount": 189
-        }
-    ]
-}
-*/
+import { IDetailPurchase } from 'src/types/purchases';
+
+const initialFormRegister: IDetailPurchase = {
+  id: 0,
+  barCode: '',
+  detailTypeId: '',
+  invoiceId: 0,
+  itemId: 0,
+  itemName: '',
+  itemBarCode: null,
+  productCode: null,
+  description: '',
+  quantity: 0,
+  priceAmount: 0,
+  discountDecimalPercent: 0,
+  subtotal: 0,
+  vatTaxCode: '',
+  vatTaxDecimalPercent: 0,
+  documentId: null,
+  decreaseDocumentId: null,
+  purchaseRequisitionDocumentId: null,
+  totalImpuesto: 0,
+  total: 0,
+  montoDescuento: 0,
+  invoiceDetailsDocument: [],
+  taxDetails: [],
+};
 
 function PurchaseDetailForm() {
+  const [formRegister, setFormRegister] = useState<IDetailPurchase>(initialFormRegister);
+
+  const updateFormRegister = (key: keyof IDetailPurchase, value: any) => {
+    setFormRegister((prevFormRegister) => ({
+      ...prevFormRegister,
+      [key]: value,
+    }));
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    updateFormRegister(name as keyof IDetailPurchase, value);
+  };
+
   const { control, watch, setValue } = useFormContext();
 
-  const { fields, append, remove } = useFieldArray({
+  const { append, remove } = useFieldArray({
     control,
     name: 'details',
   });
 
-  console.log('fieldsfieldsfieldsfields',fields)
-
   const values = watch();
 
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
+  const inputCostoRef = useRef<HTMLInputElement>(null);
+  const inputDescPerRef = useRef<HTMLInputElement>(null);
+  const inputDescValRef = useRef<HTMLInputElement>(null);
+  const addButtonValRef = useRef<HTMLButtonElement>(null);
 
-  const [inputBarcodeValue, setInputBarcodeValue] = useState<string>('');
-  const [inputCantidadValue, setInputCantidadValue] = useState<number>(0);
-  const [inputCostoValue, setInputCostoValue] = useState<number>(0);
   const [inputNameValue, setInputNameValue] = useState<string>('');
   const [barcodeText, setBarcodeText] = useState<string>('');
   const [debouncedValueName, setDebouncedValueName] = useState<string>(inputNameValue);
@@ -91,12 +97,20 @@ function PurchaseDetailForm() {
   }, [inputNameValue]);
 
   const [itemSeach, setItemSeach] = useState<any>();
-  const [selectedItem, setSelectedItem] = useState<any>({ itemId: 0, barCode: '', name: '', taxes: [] });
-  const handleSeletedItem = (event: any, selectedValue: any) => {   
-    console.log('selectedValue', selectedValue)  
+  const [selectedItem, setSelectedItem] = useState<any>({
+    itemId: 0,
+    barCode: '',
+    name: '',
+    taxes: [],
+  });
+  const handleSeletedItem = (event: any, selectedValue: any) => {
     setSelectedItem(selectedValue);
     setValueTax([selectedValue.taxes[0].description]);
-    setInputBarcodeValue(selectedValue.barCode);
+    console.log('valueTax',selectedValue)
+    updateFormRegister('barCode', selectedValue.barCode);
+    updateFormRegister('vatTaxCode', selectedValue.taxes[0].taxCode);
+    updateFormRegister('vatTaxDecimalPercent', selectedValue.taxes[0].percentValue);
+    updateFormRegister('totalImpuesto', formRegister.subtotal*selectedValue.taxes[0].percentValue);
   };
 
   const objTaxesCatalog = JSON.parse(localStorageGetItem('taxes-catalog') ?? '');
@@ -106,8 +120,6 @@ function PurchaseDetailForm() {
 
   const querySearchItem = useItemByBarcode(barcodeText);
   const querySearchItemByName = useItemByName(debouncedValueName);
-
-
 
   useEffect(() => {
     if (querySearchItem.isFetched) {
@@ -119,7 +131,8 @@ function PurchaseDetailForm() {
           itemId: querySearchItem.data[0].id,
           barCode: querySearchItem.data[0].barCode,
           name: querySearchItem.data[0].name,
-          taxes: querySearchItem.data[0].taxes
+          taxes: querySearchItem.data[0].taxes,
+          collectionPath: querySearchItem.data[0].collectionPath,
         });
         setValueTax([querySearchItem.data[0].taxes[0].description]);
         if (inputDescriptionRef.current) {
@@ -128,6 +141,7 @@ function PurchaseDetailForm() {
       } else {
         setItemSeach(null);
         setSelectedItem({ itemId: 0, barCode: '', name: 'No Hay Coincidencias' });
+        setFormRegister(initialFormRegister);
         enqueueSnackbar('Barcode No Existe', {
           variant: 'warning',
         });
@@ -139,13 +153,14 @@ function PurchaseDetailForm() {
   useEffect(() => {
     if (querySearchItemByName.isFetched) {
       setItemsArray(querySearchItemByName.data);
-      // setInputBarcodeValue('');
+      updateFormRegister('barCode', '');
+
       // setSelectedItem({itemId:0, barCode:'', name:''})
       if (querySearchItemByName.data.length > 0) {
         //    setSelectedItem({itemId:querySearchItemByName.data[0].itemId, barCode:querySearchItemByName.data[0].barCode, name:querySearchItemByName.data[0].name});
         //    setInputBarcodeValue(querySearchItemByName.data[0].barCode);
       } else {
-        setInputBarcodeValue('');
+        updateFormRegister('barCode', '');
         setSelectedItem({ itemId: 0, barCode: '', name: 'No Hay Coincidencias', taxes: [] });
       }
     }
@@ -158,37 +173,63 @@ function PurchaseDetailForm() {
         setInputNameValue(event.target.value);
         break;
       case 'id-barcode':
-        setInputBarcodeValue(event.target.value);
+        // setInputBarcodeValue(event.target.value);
         break;
       case 'id-quantity':
-          setInputCantidadValue(event.target.value);
-          break;  
+        break;
       case 'id-precio':
-          setInputCostoValue(event.target.value);
-          break;            
+        break;
       default:
         break;
     }
   };
 
-
   const handleKeyDown = (event: any) => {
+    let subtotalbruto: number=0;
+    let desvalue: number=0;
     if (event.key === 'Enter') {
-      event.preventDefault(); 
+      event.preventDefault();
       switch (event.target.name) {
-        case 'id-description':
-          console.log('inputNameValue');
+        case 'quantity':
+          console.log('quantity');
+          if (inputCostoRef.current) {
+            inputCostoRef.current.focus();
+          }
           break;
-        case 'id-barcode':
-          setBarcodeText(inputBarcodeValue);
+          case 'priceAmount':
+            console.log('priceAmount');
+            if (inputDescPerRef.current) {
+              inputDescPerRef.current.focus();
+            }
+            break;
+        case 'barCode':
+          setBarcodeText(formRegister.barCode ?? '');
           break;
-        case 'id-quantity':
-          console.log('inputQuantity');
-            break;                    
-        case 'id-precio':
-          console.log('inputPrecio');
-            break;  
-          default:
+        case 'discountDecimalPercent':
+          subtotalbruto = formRegister.quantity*formRegister.priceAmount;
+          desvalue = subtotalbruto*(event.target.value)/100;
+          updateFormRegister('subtotal', subtotalbruto-desvalue);
+          updateFormRegister('totalImpuesto', (subtotalbruto-desvalue)*formRegister.vatTaxDecimalPercent);
+          console.log('total', formRegister.vatTaxDecimalPercent,formRegister.totalImpuesto,formRegister.subtotal)
+          updateFormRegister('total', (subtotalbruto-desvalue)+(formRegister.totalImpuesto ?? 0));
+          updateFormRegister('montoDescuento', desvalue.toFixed(2) );
+          if (inputDescValRef.current) {
+            inputDescValRef.current.focus();
+          }
+
+          break;
+        case 'montoDescuento':
+          subtotalbruto = formRegister.quantity*formRegister.priceAmount;
+          desvalue = ((event.target.value)*100)/subtotalbruto;
+          updateFormRegister('subtotal', subtotalbruto-event.target.value);
+          updateFormRegister('totalImpuesto', (subtotalbruto-event.target.value)*formRegister.vatTaxDecimalPercent);
+          updateFormRegister('total', (subtotalbruto-event.target.value)+(formRegister.totalImpuesto ?? 0));
+          updateFormRegister('discountDecimalPercent', desvalue.toFixed(4) );
+          if (addButtonValRef.current) {
+            addButtonValRef.current.focus();
+          }
+                    break;
+        default:
           break;
       }
       // buscarEnAPI(inputValue);
@@ -196,60 +237,58 @@ function PurchaseDetailForm() {
   };
 
   const handleAdd = () => {
-    console.log('selectedItem',selectedItem);
-    if(selectedItem.itemId===0){
+    if (selectedItem.itemId === 0) {
       enqueueSnackbar('Debe Seleccionar un Item', {
         variant: 'warning',
       });
       return;
     }
-    if(inputCantidadValue*inputCostoValue===0){
+    if (formRegister.subtotal === 0) {
       enqueueSnackbar('Costo y Cantidad Debe Ser Mayor a 0', {
         variant: 'warning',
       });
       return;
     }
+    console.log('selectedItem.taxes[0]',selectedItem.taxes[0])
     append({
-      "id": "",
-      "detailTypeId": "Article",
-      "invoiceId": 68317,
-      "itemId": selectedItem.itemId,
-      "itemName": null,
-      "itemBarCode": selectedItem.barCode,
-      "barCode": selectedItem.barCode,
-      "productCode": null,
-      "description": selectedItem.name,
-      "quantity": inputCantidadValue,
-      "priceAmount": inputCostoValue,
-      "discountDecimalPercent": 0,
-      "subtotal": Number(inputCantidadValue*inputCostoValue),
-      "vatTaxCode": "2",
-      "vatTaxDecimalPercent": 0.12,
-      "documentId": null,
-      "decreaseDocumentId": null,
-      "purchaseRequisitionDocumentId": null,
-      "invoiceDetailsDocument": [],
-      "taxDetails": [
-          {
-              "id": 12877,
-              "taxId": 1,
-              "taxCode": "2",
-              "taxDescription": "IVA",
-              "percentId": 2,
-              "percentCode": "2",
-              "percentDescription": "12%",
-              "percentValue": 0.12,
-              "taxAmount": 189
-          }
-      ]
-  });
-      // clear form data
-      setValueTax([]);
-      setItemsArray([]);
-      setInputBarcodeValue("");
-      setSelectedItem({ itemId: 0, barCode: '', name: '', taxes: [] });
-      setInputCantidadValue(0);
-      setInputCostoValue(0);
+      id: '',
+      detailTypeId: 'Article',
+      invoiceId: 68317,
+      itemId: selectedItem.itemId,
+      itemName: null,
+      itemBarCode: selectedItem.barCode,
+      barCode: formRegister.barCode,
+      productCode: null,
+      description: selectedItem.name,
+      quantity: formRegister.quantity,
+      priceAmount: formRegister.priceAmount,
+      discountDecimalPercent: formRegister.discountDecimalPercent,
+      subtotal: formRegister.subtotal,
+      vatTaxCode: selectedItem.taxes[0].taxCode,
+      vatTaxDecimalPercent: selectedItem.taxes[0].percentValue,
+      documentId: null,
+      decreaseDocumentId: null,
+      purchaseRequisitionDocumentId: null,
+      invoiceDetailsDocument: [],
+      taxDetails: [
+        {
+          id: 0,
+          taxId: selectedItem.taxes[0].id,
+          taxCode: selectedItem.taxes[0].taxCode,
+          taxDescription: selectedItem.taxes[0].description,
+          percentId: selectedItem.taxes[0].id,
+          percentCode: selectedItem.taxes[0].percentCode,
+          percentDescription: selectedItem.taxes[0].description,
+          percentValue: selectedItem.taxes[0].percentValue,
+          taxAmount: formRegister.discountDecimalPercent*formRegister.subtotal,
+        },
+      ],
+    });
+    // clear form data
+    setValueTax([]);
+    setItemsArray([]);
+    updateFormRegister('barCode', '');
+    setSelectedItem({ itemId: 0, barCode: '', name: '', taxes: [] });
   };
   // const change = () => {
   //   setValue(`details[1].priceAmount`, 15);
@@ -274,53 +313,111 @@ function PurchaseDetailForm() {
     [setValue, values.details]
   );
 
+  const handleOnBlurDecimal = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
+      setValue(`details[${index}].priceAmount`, event.target.value);
+
+      /*  setValue(
+        `details[${index}].subtotal`,
+        values.details.map((item: any) => item.quantity * item.priceAmount)[index]
+      );
+      setValue(
+        `details[${index}].taxDetails[0].taxAmount`,
+        values.details.map((item: any) => item.subtotal * item.vatTaxDecimalPercent)[index]
+      );  */
+    },
+    [setValue]
+  );
+
+
   const calcSubTotal = () =>
     // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
-     values.details.reduce((accumulator: number, item: any) => accumulator + item.subtotal, 0)
-
-  
+    values.details.reduce((accumulator: number, item: any) => accumulator + item.subtotal, 0);
+  const calcTotal = () =>
+    // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
+    values.details.reduce(
+      (accumulator: number, item: any) =>
+        accumulator + item.subtotal * (1 + item.vatTaxDecimalPercent),
+      0
+    );
+  const calcImpuestos = () =>
+    // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
+    values.details.reduce(
+      (accumulator: number, item: any) => accumulator + item.subtotal * item.vatTaxDecimalPercent,
+      0
+    );
 
   const renderTotal = (
     <>
       <TableRow>
-        <TableCell colSpan={5} />
-        <TableCell sx={{ color: 'text.secondary' }}>
+        <TableCell colSpan={7} />
+        <TableCell sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
           Subtotal
         </TableCell>
-        <TableCell width={120} sx={{ typography: 'subtitle2' }}>
+        <TableCell align="right" width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          {calcSubTotal()}
+          {calcSubTotal().toFixed(2)}
         </TableCell>
       </TableRow>
-  
+
       <TableRow>
-        <TableCell colSpan={5} />
-        <TableCell sx={{ color: 'text.secondary' }}>Impuestos</TableCell>
-        <TableCell width={120}>{0}</TableCell>
+        <TableCell colSpan={7} />
+        <TableCell sx={{ typography: 'subtitle2' }}>Impuestos</TableCell>
+        <TableCell align="right" width={140} sx={{ typography: 'subtitle2' }}>
+          {calcImpuestos().toFixed(2)}
+        </TableCell>
       </TableRow>
-  
+
       <TableRow>
-        <TableCell colSpan={5} />
+        <TableCell colSpan={7} />
         <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
-        <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {0}
+        <TableCell align="right" width={140} sx={{ typography: 'subtitle1' }}>
+          {calcTotal().toFixed(2)}
         </TableCell>
       </TableRow>
     </>
   );
+
+  useEffect(() => {
+    if (formRegister.quantity) {
+      const subTotal = formRegister.quantity * (formRegister.priceAmount ?? 0) -(formRegister.montoDescuento ?? 0);
+      const impuestos = subTotal * (formRegister.vatTaxDecimalPercent ?? 0);
+      updateFormRegister('subtotal', subTotal);
+      updateFormRegister('totalImpuesto', impuestos);
+      updateFormRegister('total', subTotal+impuestos);
+
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formRegister.quantity]);
+
+  useEffect(() => {
+    if (formRegister.priceAmount) {
+      const subTotal = formRegister.priceAmount * (formRegister.quantity ?? 0) -(formRegister.montoDescuento ?? 0);
+      const impuestos = subTotal * (formRegister.vatTaxDecimalPercent ?? 0);
+      updateFormRegister('subtotal', subTotal);
+      updateFormRegister('totalImpuesto', impuestos);
+      updateFormRegister('total', subTotal+impuestos);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formRegister.priceAmount]);
 
   return (
     <Card style={{ padding: '5px' }}>
       <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
         <Stack>
           <RHFTextField
-            id="id-barcode"
-            name="id-barcode"
+            id="barCode"
+            name="barCode"
             label="BarCode"
-            onChange={searchBarcode}
+            InputProps={{
+              inputProps: {
+                style: { textAlign: 'left', width: '100px' },
+              },
+            }}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            value={inputBarcodeValue}
+            value={formRegister.barCode}
           />
         </Stack>
         <Stack>
@@ -330,7 +427,8 @@ function PurchaseDetailForm() {
               itemId: option.id,
               barCode: option.barCode,
               name: option.name,
-              taxes: option.taxes
+              collectionPath: option.collectionPath,
+              taxes: option.taxes,
             }))}
             getOptionLabel={(option: any) => option.name}
             freeSolo
@@ -356,6 +454,15 @@ function PurchaseDetailForm() {
                   type: 'Nombre de Item',
                 }}
               />
+            )}
+            renderOption={(props, option) => (
+              <li {...props}>
+                <div>
+                  <strong>{option.name}</strong>
+                  <p>Barcode: {option.barCode}</p>
+                  <p>Categoría: {option.collectionPath}</p>
+                </div>
+              </li>
             )}
           />
         </Stack>
@@ -386,37 +493,130 @@ function PurchaseDetailForm() {
         </Stack>
         <Stack>
           <RHFTextField
-            id="id-quantity"
-            name="id-quantity"
-            type='number'
+            id="quantity"
+            name="quantity"
+            type="number"
             label="Cantidad"
-            onChange={searchBarcode}
+            InputProps={{
+              inputProps: {
+                style: { textAlign: 'right', width: '100px' },
+              },
+            }}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            value={inputCantidadValue}
+            value={formRegister.quantity}
           />
+          <Box
+            sx={{
+              width: 150,
+              backgroundColor: 'rgba(145, 158, 171, 0.24)',
+              borderRadius: '5px',
+              marginTop: '10px',
+            }}
+          >
+            <Typography variant="subtitle2">SubTotal</Typography>
+
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign:'right', marginRight:'25px' }} noWrap>
+              $ {formRegister.subtotal.toFixed(2)}
+            </Typography>
+          </Box>
         </Stack>
         <Stack>
           <RHFTextField
-            id="id-precio"
-            name="id-precio"
-            type='number'
+            id="priceAmount"
+            name="priceAmount"
+            type="number"
+            inputRef={inputCostoRef}
+            autoFocus
             label="Costo Unitario"
-            onChange={searchBarcode}
+            InputProps={{
+              inputProps: {
+                style: { textAlign: 'right', width: '100px' },
+              },
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            }}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            value={inputCostoValue}
+            value={formRegister.priceAmount}
           />
+
+          <Box
+            sx={{
+              width: 150,
+              backgroundColor: 'rgba(145, 158, 171, 0.24)',
+              borderRadius: '5px',
+              marginTop: '10px',
+            }}
+          >
+            <Typography variant="subtitle2">Impuestos</Typography>
+
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign:'right', marginRight:'25px' }} noWrap>
+              $ {formRegister.totalImpuesto?.toFixed(2)}
+            </Typography>
+          </Box>
         </Stack>
         <Stack>
-        <Button
-          size="small"
-          color="primary"
-          variant='contained'
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={handleAdd}
-          sx={{ flexShrink: 0 }}
-        >
-          Agregar
-        </Button>
+          <RHFTextField
+            id="discountDecimalPercent"
+            name="discountDecimalPercent"
+            inputRef={inputDescPerRef}
+            type="number"
+            label="Descuento %"
+            InputProps={{
+              inputProps: {
+                style: { textAlign: 'right', width: '100px' },
+              },
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            value={formRegister.discountDecimalPercent}
+          />
+          <Box
+            sx={{
+              width: 150,
+              backgroundColor: 'rgba(145, 158, 171, 0.24)',
+              borderRadius: '5px',
+              marginTop: '10px',
+            }}
+          >
+            <Typography variant="subtitle2">Total</Typography>
+
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign:'right', marginRight:'25px' }} noWrap>
+              $ {formRegister.total?.toFixed(2)}
+            </Typography>
+          </Box>
+        </Stack>
+        <Stack>
+          <Stack>
+            <RHFTextField
+              id="montoDescuento"
+              name="montoDescuento"
+              type="number"
+              inputRef={inputDescValRef}
+              label="Descuento $"
+              InputProps={{
+                inputProps: {
+                  style: { textAlign: 'right', width: '100px' },
+                },
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              }}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              value={formRegister.montoDescuento}
+            />
+          </Stack>
+          <Button
+            size="small"
+            ref={addButtonValRef}
+            color="primary"
+            variant="contained"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={handleAdd}
+            sx={{ flexShrink: 0, mt: 1 }}
+          >
+            Agregar
+          </Button>
         </Stack>
       </Stack>
 
@@ -434,6 +634,8 @@ function PurchaseDetailForm() {
                 <TableCell>Cantidad</TableCell>
                 <TableCell>Precio Unitario</TableCell>
                 <TableCell>Descuento</TableCell>
+                <TableCell>SubTotal</TableCell>
+                <TableCell>Impuestos</TableCell>
                 <TableCell>Total</TableCell>
               </TableRow>
             </TableHead>
@@ -463,6 +665,13 @@ function PurchaseDetailForm() {
                       size="small"
                       name={`details[${index}].quantity`}
                       variant="standard"
+                      type="number"
+                      style={{ width: '75px' }}
+                      InputProps={{
+                        inputProps: {
+                          style: { textAlign: 'right', width: '75px' },
+                        },
+                      }}
                       onChange={(event) => handleChangeQuantity(event, index)}
                       InputLabelProps={{ shrink: true }}
                     />
@@ -472,11 +681,26 @@ function PurchaseDetailForm() {
                       size="small"
                       name={`details[${index}].priceAmount`}
                       variant="standard"
+                      onBlur={(event) => handleOnBlurDecimal(event, index)}
+                      type="number"
+                      style={{ width: '100px' }}
+                      InputProps={{
+                        inputProps: {
+                          style: { textAlign: 'right', width: '100px' },
+                        },
+                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                      }}
                       InputLabelProps={{ shrink: true }}
                     />
                   </TableCell>
                   <TableCell>{item.discountDecimalPercent}%</TableCell>
-                  <TableCell>{item.subtotal}</TableCell>
+                  <TableCell align="right">{item.subtotal.toFixed(2)}</TableCell>
+                  <TableCell align="right">
+                    {(item.vatTaxDecimalPercent * item.subtotal).toFixed(2)}
+                  </TableCell>
+                  <TableCell align="right">
+                    {((1 + item.vatTaxDecimalPercent) * item.subtotal).toFixed(2)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

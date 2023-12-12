@@ -11,7 +11,7 @@ export type ITaxDetail = {
 };
 
 export type IDetailPurchase = {
-  id: number;
+  id: number | string;
   detailTypeId: string;
   invoiceId: number;
   itemId: number;
@@ -30,6 +30,10 @@ export type IDetailPurchase = {
   purchaseRequisitionDocumentId: number | null;
   invoiceDetailsDocument: any[];
   taxDetails: ITaxDetail[];
+  barCode?: string;
+  totalImpuesto?: number;
+  total?: number;
+  montoDescuento?: number;
 };
 
 export type IPartner = {
