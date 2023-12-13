@@ -10,11 +10,13 @@ import {
   Table,
   Button,
   TableRow,
+  Collapse,
   TextField,
   TableHead,
   TableCell,
   TableBody,
   Typography,
+  IconButton,
   Autocomplete,
   TableContainer,
   InputAdornment,
@@ -75,6 +77,12 @@ function PurchaseDetailForm() {
     let pvalue: number = 0;
     let subtotalbruto: number = 0;
     switch (name) {
+      case 'quantity':
+      case 'priceAmount':
+        pvalue = parseInt(event.target.value, 10);
+        if (pvalue < 0) pvalue = 0;
+        updateFormRegister(name as keyof IDetailPurchase, pvalue);
+        break;
       case  'discountDecimalPercent':
         pvalue = parseInt(event.target.value, 10);
         if (pvalue > 100) pvalue = 100;
@@ -113,6 +121,7 @@ function PurchaseDetailForm() {
   const inputBarcodeRef = useRef<HTMLInputElement>(null);
 
   const [inputNameValue, setInputNameValue] = useState<string>('');
+  const [showCreateItem, setShowCreateItem] = useState<boolean>(false);
   const [barcodeText, setBarcodeText] = useState<string>('');
   const [debouncedValueName, setDebouncedValueName] = useState<string>(inputNameValue);
 
@@ -146,6 +155,7 @@ function PurchaseDetailForm() {
   const taxesCatalog = objTaxesCatalog.taxes;
   const [valueTax, setValueTax] = useState<any[]>([]);
   const [itemsArray, setItemsArray] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
 
   const querySearchItem = useItemByBarcode(barcodeText);
   const querySearchItemByName = useItemByName(debouncedValueName);
@@ -166,6 +176,7 @@ function PurchaseDetailForm() {
         setValueTax([querySearchItem.data[0].taxes[0].description]);
       } else {
         setItemSeach(null);
+        setShowCreateItem(true)
         setSelectedItem({ itemId: 0, barCode: '', name: 'No Hay Coincidencias' });
         setFormRegister(initialFormRegister);
         enqueueSnackbar('Barcode No Existe', {
@@ -211,7 +222,11 @@ function PurchaseDetailForm() {
   };
 
   const handleKeyDown = (event: any) => {
+    setShowCreateItem(false);
     let subtotalbruto: number = 0;
+    let percentage : number = 0;
+    let taxItem: any = {};
+    let impuestos: number = 0;
     let desvalue: number = 0;
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -227,7 +242,16 @@ function PurchaseDetailForm() {
           subtotalbruto = formRegister.quantity * formRegister.priceAmount;
           desvalue = (formRegister.montoDescuento ?? 0 ) / subtotalbruto*100;
           updateFormRegister('discountDecimalPercent', desvalue.toFixed(4));
-
+          // eslint-disable-next-line no-case-declarations
+          taxItem = taxesCatalog.find((tax: any) => tax.description === valueTax[0]);
+          // eslint-disable-next-line no-case-declarations
+         percentage = Number(taxItem?.percentValue ?? 0);
+          updateFormRegister('vatTaxDecimalPercent', percentage ?? 0 );
+          impuestos = subtotalbruto * (percentage ?? 0);
+          updateFormRegister(
+            'totalImpuesto',
+            impuestos
+          );
           if (inputCostoRef.current) {
             inputCostoRef.current.focus();
           }
@@ -237,7 +261,15 @@ function PurchaseDetailForm() {
           subtotalbruto = formRegister.quantity * formRegister.priceAmount;
           desvalue = (formRegister.montoDescuento ?? 0 ) / subtotalbruto*100;
           updateFormRegister('discountDecimalPercent', desvalue.toFixed(4));
+          taxItem = taxesCatalog.find((tax: any) => tax.description === valueTax[0]);
+          percentage = Number(taxItem.percentValue ?? 0);
 
+          updateFormRegister('vatTaxDecimalPercent', percentage ?? 0 );
+          impuestos = subtotalbruto * (percentage ?? 0);
+          updateFormRegister(
+            'totalImpuesto',
+            impuestos
+          );
           if (inputDescPerRef.current) {
             inputDescPerRef.current.focus();
           }
@@ -291,6 +323,7 @@ function PurchaseDetailForm() {
   };
 
   const handleAdd = () => {
+    setShowCreateItem(false);
     if (selectedItem.itemId === 0) {
       enqueueSnackbar('Debe Seleccionar un Item', {
         variant: 'warning',
@@ -365,6 +398,7 @@ function PurchaseDetailForm() {
 
   const handleChangeQuantity = useCallback(
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
+      setShowCreateItem(false);
       setValue(`details[${index}].quantity`, Number(event.target.value));
       setValue(
         `details[${index}].subtotal`,
@@ -411,6 +445,10 @@ function PurchaseDetailForm() {
       0
     );
 
+    const handleOpenCollapse = () => {
+      setOpen(!open);
+    };
+
   const renderTotal = (
     <>
       <TableRow>
@@ -425,13 +463,72 @@ function PurchaseDetailForm() {
         </TableCell>
       </TableRow>
 
-      <TableRow>
-        <TableCell colSpan={7} />
-        <TableCell sx={{ typography: 'subtitle2' }}>Impuestos</TableCell>
+      <TableRow>        
+        <TableCell colSpan={6} />
+        <TableCell>
+        <IconButton aria-label="expand row" size="small" onClick={() => handleOpenCollapse()}>
+            {open ? <Iconify icon="mdi:chevron-up" /> : <Iconify icon="mdi:chevron-down" />}
+          </IconButton>
+                </TableCell>
+                <TableCell sx={{ typography: 'subtitle2' }}>Impuestos</TableCell>
         <TableCell align="right" width={140} sx={{ typography: 'subtitle2' }}>
           {calcImpuestos().toFixed(2)}
         </TableCell>
       </TableRow>
+      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+          <div style={{display: 'flex', justifyContent:'flex-end',width: '100%'}}>
+            <Table size="medium" sx={{ maxWidth: '250px' }}>
+              <TableBody>
+                  <TableRow>
+                    <TableCell>SubTotal</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>SubTotal Iva 12%</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>SubTotal Iva 0%</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>SubTotal No Objeto</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>SubTotal Exento</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>SubTotal Sin impuestos</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Descuento</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>IVA 12%</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>ICE</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Otros</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Total</TableCell>
+                    <TableCell>0</TableCell>
+                  </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </Collapse>
+      </TableCell>
 
       <TableRow>
         <TableCell colSpan={7} />
@@ -479,6 +576,7 @@ function PurchaseDetailForm() {
   const onSelect = (item: IItemResult | null) => {
     if (item) {
       console.log('item', item);
+      setShowCreateItem(false);
       setSelectedItem(item);
       setBarcodeText(item.barCode);
       updateFormRegister('barCode', item.barCode);
@@ -501,6 +599,8 @@ function PurchaseDetailForm() {
       // clearErrors('cC_RUC_DNI');
     }
   };
+
+  
   return (
     <Card style={{ padding: '5px' }}>
       <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
@@ -523,6 +623,18 @@ function PurchaseDetailForm() {
             onKeyDown={handleKeyDown}
             value={formRegister.barCode}
           />
+          {
+            showCreateItem && (          <Button
+              size="small"
+              color="primary"
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={undefined}
+              sx={{ flexShrink: 0, mt: 1 }}
+            >
+              Crear Item
+            </Button>)
+          }
         </Stack>
         <Stack>
           <Autocomplete
@@ -771,7 +883,7 @@ function PurchaseDetailForm() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {values.details.reverse().map((item: any, index: any) => (
+              {values.details.map((item: any, index: any) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <Button
