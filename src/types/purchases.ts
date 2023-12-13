@@ -151,3 +151,20 @@ export type IPurchaseRegister = {
   allowEdit: boolean;
   details: IDetailPurchase[];
 };
+
+export interface ITaxes {
+  id: number;
+  percentCode: string;
+  percentValue: number;
+  tax: string;
+  taxCode: string;
+  description: string;
+}
+
+export interface IItemResult {
+  id: number;
+  barCode: string;
+  name: string;
+  collectionPath: string;
+  taxes: ITaxes[];
+}

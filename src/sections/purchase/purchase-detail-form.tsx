@@ -20,6 +20,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useItemByName, useItemByBarcode } from 'src/hooks/use-catalog';
 
 import { localStorageGetItem } from 'src/utils/storage-available';
@@ -28,7 +29,9 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { RHFTextField } from 'src/components/hook-form';
 
-import { IDetailPurchase } from 'src/types/purchases';
+import { IItemResult, IDetailPurchase } from 'src/types/purchases';
+
+import ItemListDialog from './item-list-dialog';
 
 const initialFormRegister: IDetailPurchase = {
   id: 0,
@@ -58,6 +61,7 @@ const initialFormRegister: IDetailPurchase = {
 
 function PurchaseDetailForm() {
   const [formRegister, setFormRegister] = useState<IDetailPurchase>(initialFormRegister);
+  const from = useBoolean();
 
   const updateFormRegister = (key: keyof IDetailPurchase, value: any) => {
     setFormRegister((prevFormRegister) => ({
@@ -68,23 +72,45 @@ function PurchaseDetailForm() {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    updateFormRegister(name as keyof IDetailPurchase, value);
+    let pvalue: number = 0;
+    let subtotalbruto: number = 0;
+    switch (name) {
+      case  'discountDecimalPercent':
+        pvalue = parseInt(event.target.value, 10);
+        if (pvalue > 100) pvalue = 100;
+        if (pvalue < 0) pvalue = 0;
+        updateFormRegister(name as keyof IDetailPurchase, pvalue);
+        break;
+        case  'montoDescuento':
+          pvalue = parseInt(event.target.value, 10);
+          subtotalbruto = formRegister.quantity * formRegister.priceAmount;
+          if (pvalue > subtotalbruto) pvalue = subtotalbruto;
+          if (pvalue < 0) pvalue = 0;
+          updateFormRegister(name as keyof IDetailPurchase, pvalue);
+          break;
+
+      default:
+        updateFormRegister(name as keyof IDetailPurchase, value);
+        break;
+    }
+
   };
 
   const { control, watch, setValue } = useFormContext();
 
-  const { append, remove } = useFieldArray({
+  const { prepend, remove } = useFieldArray({
     control,
     name: 'details',
   });
 
   const values = watch();
 
-  const inputDescriptionRef = useRef<HTMLInputElement>(null);
   const inputCostoRef = useRef<HTMLInputElement>(null);
   const inputDescPerRef = useRef<HTMLInputElement>(null);
   const inputDescValRef = useRef<HTMLInputElement>(null);
   const addButtonValRef = useRef<HTMLButtonElement>(null);
+  const inputQuantityRef = useRef<HTMLInputElement>(null);
+  const inputBarcodeRef = useRef<HTMLInputElement>(null);
 
   const [inputNameValue, setInputNameValue] = useState<string>('');
   const [barcodeText, setBarcodeText] = useState<string>('');
@@ -106,11 +132,14 @@ function PurchaseDetailForm() {
   const handleSeletedItem = (event: any, selectedValue: any) => {
     setSelectedItem(selectedValue);
     setValueTax([selectedValue.taxes[0].description]);
-    console.log('valueTax',selectedValue)
+    console.log('valueTax', selectedValue);
     updateFormRegister('barCode', selectedValue.barCode);
     updateFormRegister('vatTaxCode', selectedValue.taxes[0].taxCode);
     updateFormRegister('vatTaxDecimalPercent', selectedValue.taxes[0].percentValue);
-    updateFormRegister('totalImpuesto', formRegister.subtotal*selectedValue.taxes[0].percentValue);
+    updateFormRegister(
+      'totalImpuesto',
+      formRegister.subtotal * selectedValue.taxes[0].percentValue
+    );
   };
 
   const objTaxesCatalog = JSON.parse(localStorageGetItem('taxes-catalog') ?? '');
@@ -135,9 +164,6 @@ function PurchaseDetailForm() {
           collectionPath: querySearchItem.data[0].collectionPath,
         });
         setValueTax([querySearchItem.data[0].taxes[0].description]);
-        if (inputDescriptionRef.current) {
-          inputDescriptionRef.current.focus();
-        }
       } else {
         setItemSeach(null);
         setSelectedItem({ itemId: 0, barCode: '', name: 'No Hay Coincidencias' });
@@ -185,50 +211,78 @@ function PurchaseDetailForm() {
   };
 
   const handleKeyDown = (event: any) => {
-    let subtotalbruto: number=0;
-    let desvalue: number=0;
+    let subtotalbruto: number = 0;
+    let desvalue: number = 0;
     if (event.key === 'Enter') {
       event.preventDefault();
       switch (event.target.name) {
+        case 'id-description':
+          console.log('id-description');
+          if (inputQuantityRef.current) {
+            inputQuantityRef.current.focus();
+          }
+          break;
         case 'quantity':
           console.log('quantity');
+          subtotalbruto = formRegister.quantity * formRegister.priceAmount;
+          desvalue = (formRegister.montoDescuento ?? 0 ) / subtotalbruto*100;
+          updateFormRegister('discountDecimalPercent', desvalue.toFixed(4));
+
           if (inputCostoRef.current) {
             inputCostoRef.current.focus();
           }
           break;
-          case 'priceAmount':
-            console.log('priceAmount');
-            if (inputDescPerRef.current) {
-              inputDescPerRef.current.focus();
-            }
-            break;
+        case 'priceAmount':
+          console.log('priceAmount');
+          subtotalbruto = formRegister.quantity * formRegister.priceAmount;
+          desvalue = (formRegister.montoDescuento ?? 0 ) / subtotalbruto*100;
+          updateFormRegister('discountDecimalPercent', desvalue.toFixed(4));
+
+          if (inputDescPerRef.current) {
+            inputDescPerRef.current.focus();
+          }
+          break;
         case 'barCode':
           setBarcodeText(formRegister.barCode ?? '');
           break;
         case 'discountDecimalPercent':
-          subtotalbruto = formRegister.quantity*formRegister.priceAmount;
-          desvalue = subtotalbruto*(event.target.value)/100;
-          updateFormRegister('subtotal', subtotalbruto-desvalue);
-          updateFormRegister('totalImpuesto', (subtotalbruto-desvalue)*formRegister.vatTaxDecimalPercent);
-          console.log('total', formRegister.vatTaxDecimalPercent,formRegister.totalImpuesto,formRegister.subtotal)
-          updateFormRegister('total', (subtotalbruto-desvalue)+(formRegister.totalImpuesto ?? 0));
-          updateFormRegister('montoDescuento', desvalue.toFixed(2) );
+          subtotalbruto = formRegister.quantity * formRegister.priceAmount;
+          desvalue = (subtotalbruto * event.target.value) / 100;
+          updateFormRegister('subtotal', subtotalbruto - desvalue);
+          updateFormRegister(
+            'totalImpuesto',
+            (subtotalbruto - desvalue) * formRegister.vatTaxDecimalPercent
+          );
+          console.log(
+            'total',
+            formRegister.vatTaxDecimalPercent,
+            formRegister.totalImpuesto,
+            formRegister.subtotal
+          );
+          updateFormRegister('total', subtotalbruto - desvalue + (formRegister.totalImpuesto ?? 0));
+          updateFormRegister('montoDescuento', desvalue.toFixed(2));
           if (inputDescValRef.current) {
             inputDescValRef.current.focus();
           }
 
           break;
         case 'montoDescuento':
-          subtotalbruto = formRegister.quantity*formRegister.priceAmount;
-          desvalue = ((event.target.value)*100)/subtotalbruto;
-          updateFormRegister('subtotal', subtotalbruto-event.target.value);
-          updateFormRegister('totalImpuesto', (subtotalbruto-event.target.value)*formRegister.vatTaxDecimalPercent);
-          updateFormRegister('total', (subtotalbruto-event.target.value)+(formRegister.totalImpuesto ?? 0));
-          updateFormRegister('discountDecimalPercent', desvalue.toFixed(4) );
+          subtotalbruto = formRegister.quantity * formRegister.priceAmount;
+          desvalue = (event.target.value * 100) / subtotalbruto;
+          updateFormRegister('subtotal', subtotalbruto - event.target.value);
+          updateFormRegister(
+            'totalImpuesto',
+            (subtotalbruto - event.target.value) * formRegister.vatTaxDecimalPercent
+          );
+          updateFormRegister(
+            'total',
+            subtotalbruto - event.target.value + (formRegister.totalImpuesto ?? 0)
+          );
+          updateFormRegister('discountDecimalPercent', desvalue.toFixed(4));
           if (addButtonValRef.current) {
             addButtonValRef.current.focus();
           }
-                    break;
+          break;
         default:
           break;
       }
@@ -243,14 +297,13 @@ function PurchaseDetailForm() {
       });
       return;
     }
-    if (formRegister.subtotal === 0) {
-      enqueueSnackbar('Costo y Cantidad Debe Ser Mayor a 0', {
+    if (formRegister.quantity === 0) {
+      enqueueSnackbar('Cantidad Debe Ser Mayor a 0', {
         variant: 'warning',
       });
       return;
     }
-    console.log('selectedItem.taxes[0]',selectedItem.taxes[0])
-    append({
+    prepend({
       id: '',
       detailTypeId: 'Article',
       invoiceId: 68317,
@@ -280,7 +333,7 @@ function PurchaseDetailForm() {
           percentCode: selectedItem.taxes[0].percentCode,
           percentDescription: selectedItem.taxes[0].description,
           percentValue: selectedItem.taxes[0].percentValue,
-          taxAmount: formRegister.discountDecimalPercent*formRegister.subtotal,
+          taxAmount: formRegister.discountDecimalPercent * formRegister.subtotal,
         },
       ],
     });
@@ -288,7 +341,19 @@ function PurchaseDetailForm() {
     setValueTax([]);
     setItemsArray([]);
     updateFormRegister('barCode', '');
+    updateFormRegister('quantity', 1);
+    updateFormRegister('priceAmount', 1);
+    updateFormRegister('priceAmount', 1);
+    updateFormRegister('discountDecimalPercent', 0);
+    updateFormRegister('montoDescuento', 0);
+    updateFormRegister('subtotal', 1);
+    updateFormRegister('totalImpuesto', 0);
+    updateFormRegister('total', 1);
+
     setSelectedItem({ itemId: 0, barCode: '', name: '', taxes: [] });
+    if (inputBarcodeRef.current) {
+      inputBarcodeRef.current.focus();
+    }
   };
   // const change = () => {
   //   setValue(`details[1].priceAmount`, 15);
@@ -328,7 +393,6 @@ function PurchaseDetailForm() {
     },
     [setValue]
   );
-
 
   const calcSubTotal = () =>
     // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
@@ -381,27 +445,62 @@ function PurchaseDetailForm() {
 
   useEffect(() => {
     if (formRegister.quantity) {
-      const subTotal = formRegister.quantity * (formRegister.priceAmount ?? 0) -(formRegister.montoDescuento ?? 0);
+      const subTotal =
+        formRegister.quantity * (formRegister.priceAmount ?? 0) -
+        (formRegister.montoDescuento ?? 0);
       const impuestos = subTotal * (formRegister.vatTaxDecimalPercent ?? 0);
       updateFormRegister('subtotal', subTotal);
       updateFormRegister('totalImpuesto', impuestos);
-      updateFormRegister('total', subTotal+impuestos);
-
+      updateFormRegister('total', subTotal + impuestos);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formRegister.quantity]);
 
   useEffect(() => {
     if (formRegister.priceAmount) {
-      const subTotal = formRegister.priceAmount * (formRegister.quantity ?? 0) -(formRegister.montoDescuento ?? 0);
+      const subTotal =
+        formRegister.priceAmount * (formRegister.quantity ?? 0) -
+        (formRegister.montoDescuento ?? 0);
       const impuestos = subTotal * (formRegister.vatTaxDecimalPercent ?? 0);
       updateFormRegister('subtotal', subTotal);
       updateFormRegister('totalImpuesto', impuestos);
-      updateFormRegister('total', subTotal+impuestos);
+      updateFormRegister('total', subTotal + impuestos);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formRegister.priceAmount]);
 
+  useEffect(() => {
+    if (inputBarcodeRef.current) {
+      inputBarcodeRef.current.focus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSelect = (item: IItemResult | null) => {
+    if (item) {
+      console.log('item', item);
+      setSelectedItem(item);
+      setBarcodeText(item.barCode);
+      updateFormRegister('barCode', item.barCode);
+      updateFormRegister('quantity', 1);
+
+      if (inputQuantityRef.current) {
+        console.log('inputCostoRef', inputQuantityRef);
+
+        inputQuantityRef.current.focus();
+      }
+      // const provider: IProviderCatalog = {
+      //   id: partner.id,
+      //   name: partner.name,
+      //   ruc: partner.ruc,
+      // };
+      // setProviders([provider]);
+      // setValue('partnerId', provider.id);
+      // setValue('cC_RUC_DNI', provider.ruc);
+      // clearErrors('partnerId');
+      // clearErrors('cC_RUC_DNI');
+    }
+  };
   return (
     <Card style={{ padding: '5px' }}>
       <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
@@ -409,6 +508,11 @@ function PurchaseDetailForm() {
           <RHFTextField
             id="barCode"
             name="barCode"
+            inputRef={inputBarcodeRef}
+            autoFocus
+            onFocus={(event) => {
+              event.target.select();
+            }}
             label="BarCode"
             InputProps={{
               inputProps: {
@@ -444,10 +548,9 @@ function PurchaseDetailForm() {
                 {...params}
                 name="id-description"
                 label="Descripción"
-                autoFocus
+                onClick={from.onTrue}
                 onChange={searchBarcode}
                 onKeyDown={handleKeyDown}
-                inputRef={inputDescriptionRef}
                 value={selectedItem}
                 InputProps={{
                   ...params.InputProps,
@@ -456,7 +559,7 @@ function PurchaseDetailForm() {
               />
             )}
             renderOption={(props, option) => (
-              <li {...props}>
+              <li {...props} style={{ width: '500px' }}>
                 <div>
                   <strong>{option.name}</strong>
                   <p>Barcode: {option.barCode}</p>
@@ -495,6 +598,10 @@ function PurchaseDetailForm() {
           <RHFTextField
             id="quantity"
             name="quantity"
+            inputRef={inputQuantityRef}
+            onFocus={(event) => {
+              event.target.select();
+            }}
             type="number"
             label="Cantidad"
             InputProps={{
@@ -516,7 +623,11 @@ function PurchaseDetailForm() {
           >
             <Typography variant="subtitle2">SubTotal</Typography>
 
-            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign:'right', marginRight:'25px' }} noWrap>
+            <Typography
+              variant="body2"
+              sx={{ color: 'text.secondary', textAlign: 'right', marginRight: '25px' }}
+              noWrap
+            >
               $ {formRegister.subtotal.toFixed(2)}
             </Typography>
           </Box>
@@ -527,6 +638,9 @@ function PurchaseDetailForm() {
             name="priceAmount"
             type="number"
             inputRef={inputCostoRef}
+            onFocus={(event) => {
+              event.target.select();
+            }}
             autoFocus
             label="Costo Unitario"
             InputProps={{
@@ -550,19 +664,29 @@ function PurchaseDetailForm() {
           >
             <Typography variant="subtitle2">Impuestos</Typography>
 
-            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign:'right', marginRight:'25px' }} noWrap>
+            <Typography
+              variant="body2"
+              sx={{ color: 'text.secondary', textAlign: 'right', marginRight: '25px' }}
+              noWrap
+            >
               $ {formRegister.totalImpuesto?.toFixed(2)}
             </Typography>
           </Box>
         </Stack>
+
         <Stack>
           <RHFTextField
             id="discountDecimalPercent"
             name="discountDecimalPercent"
             inputRef={inputDescPerRef}
             type="number"
+            onFocus={(event) => {
+              event.target.select();
+            }}
             label="Descuento %"
-            InputProps={{
+            InputProps={
+              {
+                
               inputProps: {
                 style: { textAlign: 'right', width: '100px' },
               },
@@ -582,7 +706,11 @@ function PurchaseDetailForm() {
           >
             <Typography variant="subtitle2">Total</Typography>
 
-            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign:'right', marginRight:'25px' }} noWrap>
+            <Typography
+              variant="body2"
+              sx={{ color: 'text.secondary', textAlign: 'right', marginRight: '25px' }}
+              noWrap
+            >
               $ {formRegister.total?.toFixed(2)}
             </Typography>
           </Box>
@@ -592,6 +720,9 @@ function PurchaseDetailForm() {
             <RHFTextField
               id="montoDescuento"
               name="montoDescuento"
+              onFocus={(event) => {
+                event.target.select();
+              }}
               type="number"
               inputRef={inputDescValRef}
               label="Descuento $"
@@ -640,7 +771,7 @@ function PurchaseDetailForm() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {values.details.map((item: any, index: any) => (
+              {values.details.reverse().map((item: any, index: any) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <Button
@@ -708,6 +839,13 @@ function PurchaseDetailForm() {
           </Table>
         </Scrollbar>
       </TableContainer>
+      <ItemListDialog
+        title="Items"
+        open={from.value}
+        onClose={from.onFalse}
+        selected={(selectedId: string) => values.partnerId.toString() === selectedId}
+        onSelect={(item: IItemResult | null) => onSelect(item)}
+      />
     </Card>
   );
 }

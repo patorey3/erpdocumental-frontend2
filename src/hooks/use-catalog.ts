@@ -65,5 +65,4 @@ export const useItemByName = (name: string) =>
     queryKey: [key_item_by_name, name],
     enabled: name !== '',
     queryFn: getItemsPurchasesByName,
-    staleTime: Infinity,
   });

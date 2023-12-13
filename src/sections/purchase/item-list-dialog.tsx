@@ -1,26 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-import ListItemButton, { listItemButtonClasses } from '@mui/material/ListItemButton';
+import {
+  Box,
+  Table,
+  TableRow,
+  TableCell,
+  TableHead,
+  DialogTitle,
+  DialogContent,
+  CircularProgress,
+} from '@mui/material';
 
-import { useCatalogContact } from 'src/hooks/use-catalog';
+import { useItemByName } from 'src/hooks/use-catalog';
 
 import Iconify from 'src/components/iconify';
 import SearchNotFound from 'src/components/search-not-found';
 
-// ----------------------------------------------------------------------
+import { IItemResult } from 'src/types/purchases';
 
-interface IContactResult {
-  id: number;
-  ruc: string;
-  name: string;
-  address: string;
-}
+// ----------------------------------------------------------------------
 
 type Props = {
   title?: string;
@@ -30,14 +33,11 @@ type Props = {
   onClose: VoidFunction;
   //
   selected: (selectedId: string) => boolean;
-  onSelect: (contact: IContactResult | null) => void;
+  onSelect: (contact: IItemResult | null) => void;
 };
 
-const page = 1;
-const pageSize = 10;
-
 export default function ItemListDialog({
-  title = 'Contactos',
+  title = 'Items',
   action,
   //
   open,
@@ -46,29 +46,28 @@ export default function ItemListDialog({
   selected,
   onSelect,
 }: Props) {
-  const [filter, setFilter] = useState('');
-  const [searchAddress, setSearchAddress] = useState('');
-  const [contactList, setContactList] = useState<IContactResult[]>([]);
+  const [searchItem, setSearchItem] = useState('');
+  const [itemList, setItemList] = useState<IItemResult[]>([]);
+  const [debouncedValueName, setDebouncedValueName] = useState<string>(searchItem);
 
-  const queryCatalog = useCatalogContact(page, pageSize, filter);
+  const queryCatalog = useItemByName(debouncedValueName);
 
-  const notFound = !contactList.length && !!searchAddress;
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValueName(searchItem), 500);
 
-  const handleSearchAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchAddress(event.target.value);
-    if(event.target.value.length>0){
-      const filtersResult = `&name=${searchAddress}`;
-      setFilter(filtersResult);
-    }
+    return () => clearTimeout(timer);
+  }, [searchItem]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const notFound = !itemList.length && !!searchItem;
+
+  const handleSearchItem = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchItem(event.target.value);
   }, []);
 
-  const handleSelectAddress = useCallback(
-    (address: IContactResult | null) => {
-      onSelect(address);
-      setSearchAddress('');
-      setFilter('');
+  const handleSelect = useCallback(
+    (item: IItemResult | null) => {
+      onSelect(item);
+      setSearchItem('');
       onClose();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,107 +76,98 @@ export default function ItemListDialog({
 
   useEffect(() => {
     if (queryCatalog.isFetched) {
-      const initResult = queryCatalog.data.data.map((contact: any) => ({
-        id: contact.id,
-        ruc: contact.cC_RUC_DNI,
-        name: contact.name,
-        address: contact.address,
+      console.log(queryCatalog.data, 'queryCatalog.data');
+      const initResult: IItemResult[] = queryCatalog.data.map((item: IItemResult) => ({
+        id: item.id,
+        barCode: item.barCode,
+        name: item.name,
+        collectionPath: item.collectionPath,
+        taxes: item.taxes,
       }));
-      setContactList(initResult);
-
+      console.log(initResult, 'initResult');
+      setItemList(initResult);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryCatalog.data]);
 
-  useEffect(() => {
-    const filtersResult = `&name=${searchAddress}`; 
-    setFilter(filtersResult);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchAddress]);
-
-  
-
   const renderList = (
-    <Stack
-      spacing={0.5}
-      sx={{
-        p: 0.5,
-        maxHeight: 80 * 8,
-        overflowX: 'hidden',
-      }}
-    >
-      {contactList.map((address) => (
-        <Stack
-          key={address.id}
-          spacing={0.5}
-          component={ListItemButton}
-          selected={selected(`${address.id}`)}
-          onClick={() => handleSelectAddress(address)}
-          sx={{
-            py: 1,
-            px: 1.5,
-            borderRadius: 1,
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            [`&.${listItemButtonClasses.selected}`]: {
-              bgcolor: 'action.selected',
-              '&:hover': {
-                bgcolor: 'action.selected',
-              },
-            },
-          }}
+    <Table stickyHeader>
+      <TableHead>
+        <TableRow>
+          <TableCell align="left">Código</TableCell>
+          <TableCell align="left">Categoría</TableCell>
+        </TableRow>
+      </TableHead>
+      {itemList.map((item) => (
+        <TableRow
+          hover
+          onDoubleClick={()=>handleSelect(item)}
+          key={item.id}
+          style={{ padding: '0px' }}
         >
-          {address.ruc && (
-            <Box sx={{ typography: 'caption' }}>{address.ruc}</Box>
-          )}
-                    {address.name && (
-            <Box sx={{ typography: 'caption' }}>{address.name}</Box>
-          )}
-          {address.address && (
-            <Box sx={{ color: 'primary.main', typography: 'caption' }}>{address.address}</Box>
-          )}
-        </Stack>
+          <TableCell align="left" style={{ padding: '5px' }}>
+            <Box sx={{ width: 450 }}>
+              <Typography variant="subtitle2">{item.barCode} </Typography>
+
+              <Typography sx={{ color: 'text.secondary', typography: 'caption' }} noWrap>
+                {item.name}
+              </Typography>
+            </Box>
+          </TableCell>
+          <TableCell align="left" style={{ padding: '5px' }}>
+            <Box sx={{ color: 'text.secondary', typography: 'caption' }}>{item.collectionPath}</Box>
+          </TableCell>
+        </TableRow>
       ))}
-    </Stack>
+    </Table>
   );
 
   return (
-    <Dialog fullWidth maxWidth="md" open={open} onClose={onClose}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ p: 3, pr: 1.5 }}
-      >
-        <Typography variant="h6"> {title} </Typography>
+    <Dialog fullWidth maxWidth="md" style={{ minHeight: '450px' }} open={open} onClose={onClose}>
+      <DialogTitle sx={{ m: 0, p: 3 }} id="customized-dialog-title">
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ p: 3, pr: 1.5 }}
+        >
+          <Typography variant="h6"> {title} </Typography>
+          {queryCatalog.isPending ? <CircularProgress color="primary" size={25} /> : null}
+          {action}
+        </Stack>
+        <Stack sx={{ p: 2, pt: 0 }}>
+          <TextField
+            value={searchItem}
+            onChange={handleSearchItem}
+            autoFocus
+            placeholder="Buscar..."
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  {queryCatalog.isPending ? <CircularProgress color="primary" size={25} /> : null}
+                </InputAdornment>
+               )
+            }}
+          />
+        </Stack>
+        {queryCatalog.isFetching ? <CircularProgress color="primary" size={25} /> : null}
 
-        {action}
-      </Stack>
+      </DialogTitle>
+      <DialogContent dividers>
 
-      <Stack sx={{ p: 2, pt: 0 }}>
-        <TextField
-          value={searchAddress}
-          onChange={handleSearchAddress}
-          placeholder="Buscar..."
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Stack>
-
-      {notFound ? (
-        <SearchNotFound query={searchAddress} sx={{ px: 3, pt: 5, pb: 10 }} />
-      ) : (
-        renderList
-      )}
+        {notFound ? (
+          <SearchNotFound query={searchItem} sx={{ px: 3, pt: 5, pb: 10 }} />
+        ) : (
+          renderList
+        )}
+      </DialogContent>
     </Dialog>
   );
 }
 
 // ----------------------------------------------------------------------
-
