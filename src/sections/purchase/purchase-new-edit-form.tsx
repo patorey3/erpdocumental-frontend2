@@ -66,6 +66,8 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
 
   const loadingSend = useBoolean();
 
+
+
   const objcatalog = JSON.parse(localStorageGetItem('doc-catalog') ?? '');
   const docCatalog = objcatalog.type_docs;
   const objcitiescatalog = JSON.parse(localStorageGetItem('cities-catalog') ?? '');
@@ -166,6 +168,14 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
   } = methods;
 
   const values = watch();
+
+  const calcTotal = () =>
+  // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
+  values?.details?.reduce(
+    (accumulator: number, item: any) =>
+      accumulator + item.subtotal * (1 + item.vatTaxDecimalPercent),
+    0
+  );
 
   const handleSaveAsDraft = handleSubmit(async (data) => {
     console.info('DATA', JSON.stringify(data, null, 2));
@@ -532,7 +542,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
               />
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
-              <RHFTextField disabled name="total" label="Total" value={values.total} />
+              <RHFTextField disabled name="total" label="Total" value={calcTotal()?.toFixed(2)} />
             </Grid>
           </Grid>
           <Typography variant="h6" style={{ paddingBottom: '10px', paddingTop: '10px' }}>

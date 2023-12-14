@@ -84,10 +84,12 @@ function PurchaseDetailForm() {
         updateFormRegister(name as keyof IDetailPurchase, pvalue);
         break;
       case  'discountDecimalPercent':
-        pvalue = parseInt(event.target.value, 10);
-        if (pvalue > 100) pvalue = 100;
-        if (pvalue < 0) pvalue = 0;
-        updateFormRegister(name as keyof IDetailPurchase, pvalue);
+        
+         pvalue = parseFloat(event.target.value.replace(/./g, ','));
+         pvalue = parseFloat(event.target.value);
+         if (pvalue > 100) pvalue = 100;
+          if (pvalue < 0) pvalue = 0;
+         updateFormRegister(name as keyof IDetailPurchase, pvalue);
         break;
         case  'montoDescuento':
           pvalue = parseInt(event.target.value, 10);
@@ -139,6 +141,7 @@ function PurchaseDetailForm() {
     taxes: [],
   });
   const handleSeletedItem = (event: any, selectedValue: any) => {
+    console.log('selectedValue', selectedValue)
     setSelectedItem(selectedValue);
     setValueTax([selectedValue.taxes[0].description]);
     console.log('valueTax', selectedValue);
@@ -156,7 +159,6 @@ function PurchaseDetailForm() {
   const [valueTax, setValueTax] = useState<any[]>([]);
   const [itemsArray, setItemsArray] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-
   const querySearchItem = useItemByBarcode(barcodeText);
   const querySearchItemByName = useItemByName(debouncedValueName);
 
@@ -247,11 +249,13 @@ function PurchaseDetailForm() {
           // eslint-disable-next-line no-case-declarations
          percentage = Number(taxItem?.percentValue ?? 0);
           updateFormRegister('vatTaxDecimalPercent', percentage ?? 0 );
-          impuestos = subtotalbruto * (percentage ?? 0);
+          impuestos = (subtotalbruto - (formRegister.montoDescuento ?? 0 )) * (percentage ?? 0);
           updateFormRegister(
             'totalImpuesto',
             impuestos
           );
+          updateFormRegister('total', subtotalbruto - (formRegister.montoDescuento ?? 0 ) + ( (subtotalbruto - (formRegister.montoDescuento ?? 0 )) * percentage));
+
           if (inputCostoRef.current) {
             inputCostoRef.current.focus();
           }
@@ -270,6 +274,8 @@ function PurchaseDetailForm() {
             'totalImpuesto',
             impuestos
           );
+          updateFormRegister('total', subtotalbruto - (formRegister.montoDescuento ?? 0 ) + ( (subtotalbruto - (formRegister.montoDescuento ?? 0 )) * formRegister.vatTaxDecimalPercent));
+
           if (inputDescPerRef.current) {
             inputDescPerRef.current.focus();
           }
@@ -285,13 +291,7 @@ function PurchaseDetailForm() {
             'totalImpuesto',
             (subtotalbruto - desvalue) * formRegister.vatTaxDecimalPercent
           );
-          console.log(
-            'total',
-            formRegister.vatTaxDecimalPercent,
-            formRegister.totalImpuesto,
-            formRegister.subtotal
-          );
-          updateFormRegister('total', subtotalbruto - desvalue + (formRegister.totalImpuesto ?? 0));
+          updateFormRegister('total', subtotalbruto - desvalue + ( (subtotalbruto - desvalue) * formRegister.vatTaxDecimalPercent));
           updateFormRegister('montoDescuento', desvalue.toFixed(2));
           if (inputDescValRef.current) {
             inputDescValRef.current.focus();
@@ -308,7 +308,7 @@ function PurchaseDetailForm() {
           );
           updateFormRegister(
             'total',
-            subtotalbruto - event.target.value + (formRegister.totalImpuesto ?? 0)
+            subtotalbruto - event.target.value + ((subtotalbruto - event.target.value) * formRegister.vatTaxDecimalPercent)
           );
           updateFormRegister('discountDecimalPercent', desvalue.toFixed(4));
           if (addButtonValRef.current) {
@@ -336,6 +336,8 @@ function PurchaseDetailForm() {
       });
       return;
     }
+    const taxInfo = taxesCatalog.find((tax: any) => tax.description === valueTax[0]);
+    console.log('taxInfo', taxInfo);
     prepend({
       id: '',
       detailTypeId: 'Article',
@@ -350,8 +352,8 @@ function PurchaseDetailForm() {
       priceAmount: formRegister.priceAmount,
       discountDecimalPercent: formRegister.discountDecimalPercent,
       subtotal: formRegister.subtotal,
-      vatTaxCode: selectedItem.taxes[0].taxCode,
-      vatTaxDecimalPercent: selectedItem.taxes[0].percentValue,
+      vatTaxCode: taxInfo.taxCode,
+      vatTaxDecimalPercent: taxInfo.percentValue,
       documentId: null,
       decreaseDocumentId: null,
       purchaseRequisitionDocumentId: null,
@@ -359,18 +361,19 @@ function PurchaseDetailForm() {
       taxDetails: [
         {
           id: 0,
-          taxId: selectedItem.taxes[0].id,
-          taxCode: selectedItem.taxes[0].taxCode,
-          taxDescription: selectedItem.taxes[0].description,
-          percentId: selectedItem.taxes[0].id,
-          percentCode: selectedItem.taxes[0].percentCode,
-          percentDescription: selectedItem.taxes[0].description,
-          percentValue: selectedItem.taxes[0].percentValue,
+          taxId: taxInfo.id,
+          taxCode: taxInfo.taxCode,
+          taxDescription: taxInfo.description,
+          percentId: taxInfo.id,
+          percentCode: taxInfo.percentCode,
+          percentDescription: taxInfo.description,
+          percentValue: taxInfo.percentValue,
           taxAmount: formRegister.discountDecimalPercent * formRegister.subtotal,
         },
       ],
     });
     // clear form data
+
     setValueTax([]);
     setItemsArray([]);
     updateFormRegister('barCode', '');
@@ -402,8 +405,10 @@ function PurchaseDetailForm() {
       setValue(`details[${index}].quantity`, Number(event.target.value));
       setValue(
         `details[${index}].subtotal`,
-        values.details.map((item: any) => item.quantity * item.priceAmount)[index]
+        values.details.map((item: any) => (item.quantity * item.priceAmount) - (item.quantity * item.priceAmount*(item.discountDecimalPercent)/100 ) )[index]
       );
+      // values.details.map((item: any) => (item.quantity * item.priceAmount) - (item.quantity * item.priceAmount*(item.discountDecimalPercent)/100 ) )[index]
+
       setValue(
         `details[${index}].taxDetails[0].taxAmount`,
         values.details.map((item: any) => item.subtotal * item.vatTaxDecimalPercent)[index]
@@ -415,22 +420,39 @@ function PurchaseDetailForm() {
   const handleOnBlurDecimal = useCallback(
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
       setValue(`details[${index}].priceAmount`, event.target.value);
-
-      /*  setValue(
+        setValue(
         `details[${index}].subtotal`,
-        values.details.map((item: any) => item.quantity * item.priceAmount)[index]
+        values.details.map((item: any) => (item.quantity * item.priceAmount) - (item.quantity * item.priceAmount*(item.discountDecimalPercent)/100 ) )[index]
+      );
+
+      setValue(
+        `details[${index}].taxDetails[0].taxAmount`,
+        values.details.map((item: any) => item.subtotal * item.vatTaxDecimalPercent)[index]
+      );  
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setValue]
+  );
+  
+  const handlePercentual = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
+      setValue(`details[${index}].discountDecimalPercent`, event.target.value);
+        setValue(
+        `details[${index}].subtotal`,
+        values.details.map((item: any) =>( item.quantity * item.priceAmount) - (item.quantity * item.priceAmount*(Number(event.target.value)/100) ) )[index]
       );
       setValue(
         `details[${index}].taxDetails[0].taxAmount`,
         values.details.map((item: any) => item.subtotal * item.vatTaxDecimalPercent)[index]
-      );  */
+      );  
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setValue]
   );
 
   const calcSubTotal = () =>
     // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
-    values.details.reduce((accumulator: number, item: any) => accumulator + item.subtotal, 0);
+    values.details.reduce((accumulator: number, item: any) => accumulator + (item.quantity * item.priceAmount)-Number(item.discountDecimalPercent*(item.quantity * item.priceAmount)/100), 0);
   const calcTotal = () =>
     // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
     values.details.reduce(
@@ -444,6 +466,25 @@ function PurchaseDetailForm() {
       (accumulator: number, item: any) => accumulator + item.subtotal * item.vatTaxDecimalPercent,
       0
     );
+    const calcDescuentos = () =>
+    values.details.reduce(
+      (accumulator: number, item: any) => accumulator + Number(item.discountDecimalPercent*(item.quantity * item.priceAmount)/100),
+      0
+    );
+  const calcBaseImpuestosTipo = (type: string) =>
+    values.details.reduce((accumulator: number, item: any) => {
+      if (item.taxDetails[0].percentDescription === type) {
+        return accumulator + item.subtotal ;
+      }
+      return accumulator; // Add a default return statement
+    }, 0);
+    const calcImpuestosTipo = (type: string) =>
+    values.details.reduce((accumulator: number, item: any) => {
+      if (item.taxDetails[0].percentDescription === type) {
+        return accumulator + item.subtotal * item.taxDetails[0].percentValue;
+      }
+      return accumulator; // Add a default return statement
+    }, 0);
 
     const handleOpenCollapse = () => {
       setOpen(!open);
@@ -482,47 +523,47 @@ function PurchaseDetailForm() {
               <TableBody>
                   <TableRow>
                     <TableCell>SubTotal</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcSubTotal().toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>SubTotal Iva 12%</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcBaseImpuestosTipo('12%').toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>SubTotal Iva 0%</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcBaseImpuestosTipo('0%').toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>SubTotal No Objeto</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcBaseImpuestosTipo('No objeto de impuesto').toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>SubTotal Exento</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcBaseImpuestosTipo('Exento de IVA').toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>SubTotal Sin impuestos</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell  align='right'>{0}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Descuento</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcDescuentos().toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>IVA 12%</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcImpuestosTipo('12%').toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>ICE</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>0</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Otros</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>0</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total</TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell align='right'>{calcTotal().toFixed(2)}</TableCell>
                   </TableRow>
               </TableBody>
             </Table>
@@ -924,7 +965,7 @@ function PurchaseDetailForm() {
                       size="small"
                       name={`details[${index}].priceAmount`}
                       variant="standard"
-                      onBlur={(event) => handleOnBlurDecimal(event, index)}
+                      onChange={(event) => handleOnBlurDecimal(event, index)}
                       type="number"
                       style={{ width: '100px' }}
                       InputProps={{
@@ -936,7 +977,24 @@ function PurchaseDetailForm() {
                       InputLabelProps={{ shrink: true }}
                     />
                   </TableCell>
-                  <TableCell>{item.discountDecimalPercent}%</TableCell>
+                  <TableCell>
+                  <RHFTextField
+                      size="small"
+                      name={`details[${index}].discountDecimalPercent`}
+                      variant="standard"
+                      onChange={(event) => handlePercentual(event, index)}
+                      type="number"
+                      style={{ width: '100px' }}
+                      InputProps={{
+                        inputProps: {
+                          style: { textAlign: 'right', width: '100px' },
+                        },
+                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                      }}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                    
+                    </TableCell>
                   <TableCell align="right">{item.subtotal.toFixed(2)}</TableCell>
                   <TableCell align="right">
                     {(item.vatTaxDecimalPercent * item.subtotal).toFixed(2)}
