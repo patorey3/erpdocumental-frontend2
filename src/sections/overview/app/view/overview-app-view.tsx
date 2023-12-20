@@ -31,8 +31,9 @@ import AppTopInstalledCountries from '../app-top-installed-countries';
 const initialCatalogState = { type_docs: [] };
 const initialCitiesCatalogState = { cities: [] };
 const initialTaxesCatalogState = { taxes: [] };
+const initialListFormFilters = { filters: {}};
 
-const STORAGE_KEY = ['doc-catalog','cities-catalog','taxes-catalog'];
+const STORAGE_KEY = ['doc-catalog','cities-catalog','taxes-catalog','form-filters-purchase'];
 
 export default function OverviewAppView() {
   const { user } = useMockedUser();
@@ -65,6 +66,11 @@ export default function OverviewAppView() {
   const { state: taxesCatalog, update: updateTaxesCatalog } = useLocalStorage(
     STORAGE_KEY[2],
     initialTaxesCatalogState
+  );
+
+  const { state: listFilterPurchase, update: updateListFilterPurchase} = useLocalStorage(
+    STORAGE_KEY[3],
+    initialListFormFilters
   );
 
   useEffect(() => {
@@ -127,6 +133,15 @@ export default function OverviewAppView() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catalogTax]);
+
+  useEffect(() => {
+
+    updateListFilterPurchase('filters',{
+      hasCredit: false,
+      emittedDocument: false,  
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listFilterPurchase]);
 
   
 

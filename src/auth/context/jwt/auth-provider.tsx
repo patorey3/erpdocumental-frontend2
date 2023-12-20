@@ -2,8 +2,9 @@ import { useMemo, useEffect, useReducer, useCallback } from 'react';
 
 import axios, { endpoints } from 'src/utils/axios';
 
+// import { setSession, isValidToken } from './utils';
+import { setSession } from './utils';
 import { AuthContext } from './auth-context';
-import { setSession, isValidToken } from './utils';
 import { AuthUserType, ActionMapType, AuthStateType } from '../../types';
 
 // ----------------------------------------------------------------------
@@ -84,9 +85,11 @@ export function AuthProvider({ children }: Props) {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const accessToken = '1234567890';
+   //   const accessToken = sessionStorage.getItem(STORAGE_KEY);
 
-      if (accessToken && isValidToken(accessToken)) {
+      // if (accessToken && isValidToken(accessToken)) {
+      if (accessToken ) {
         setSession(accessToken);
 
         // const res = await axios.get(endpoints.auth.me);
@@ -131,12 +134,13 @@ export function AuthProvider({ children }: Props) {
       email,
       password,
     };
+console.log(data);
+  //  const res = await axios.post(endpoints.auth.login, data);
 
-    const res = await axios.post(endpoints.auth.login, data);
-
-    const { accessToken, user } = res.data;
-
-    setSession(accessToken);
+//    const { accessToken, user } = res.data;
+    const accessToken ='1234567890';
+    const user =  {user:'felipe.vargas@gmail.com'};
+   // setSession(accessToken);
 
     dispatch({
       type: Types.LOGIN,

@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import TableContainer from '@mui/material/TableContainer';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Stack, Select, MenuItem, TableBody, InputLabel, FormControl, SelectChangeEvent, } from '@mui/material';
+import { Stack, Select, MenuItem, TableBody, TextField, InputLabel, FormControl, SelectChangeEvent, } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -14,6 +14,7 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { usePurchases } from 'src/hooks/use-purchase';
+import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 import { localStorageGetItem } from 'src/utils/storage-available';
 
@@ -53,10 +54,12 @@ export type IPurchaseTableFilters = {
 
 export default function PurchaseListView() {
  // const theme = useTheme();
+ const objFilterList = JSON.parse(localStorageGetItem('form-filters-purchase') ?? '');
+ const {  update: updateListFilterPurchase} = useLocalStorage('form-filters-purchase',  { filters: objFilterList.filters});
+  console.log('objFilterList',objFilterList.filters);
+  const [emittedDocument, setEmittedDocument] = useState<boolean | string>(objFilterList.filters.emittedDocument);
 
-  const [emittedDocument, setEmittedDocument] = useState<boolean | string>("all");
-
-  const [hasCredit, setHasCredit] = useState<boolean | string>("all");
+  const [hasCredit, setHasCredit] = useState<boolean | string>(objFilterList.filters.hasCredit);
   const [filtersPurchase, setFiltersPurchase] = useState<IPurchaseTableFilters>({
     purchaseDate: null,
   });
@@ -115,11 +118,19 @@ export default function PurchaseListView() {
   const onChangeEstadoContable= (event: SelectChangeEvent<unknown>) => {
     if(event.target.value===true || event.target.value===false || event.target.value==="all" ){
       setEmittedDocument(event.target.value);
+      updateListFilterPurchase('filters',{
+        hasCredit: emittedDocument,
+        emittedDocument: hasCredit,  
+      });
     }
   };
   const onChangeMetodoPago= (event: SelectChangeEvent<unknown>) => {
     if(event.target.value===true || event.target.value===false || event.target.value==="all" ){
       setHasCredit(event.target.value);
+      updateListFilterPurchase('filters',{
+        hasCredit: emittedDocument,
+        emittedDocument: hasCredit,  
+      });
     }
   };
   const onChangeNaturaleza= (event: SelectChangeEvent<unknown>) => {
@@ -194,6 +205,7 @@ export default function PurchaseListView() {
               slotProps={{
                 textField: {
                   fullWidth: true,
+                  size: 'small',
                 },
               }}
               sx={{
@@ -207,6 +219,7 @@ export default function PurchaseListView() {
                 labelId="id-naturaleza-label"
                 id="id-naturaleza"
                 name='id-naturaleza'
+                size='small'
                 value={documentModelId}
                 label="Naturaleza Contable"
                 onChange={onChangeNaturaleza}
@@ -218,18 +231,28 @@ export default function PurchaseListView() {
               </Select>
             </FormControl>
             <FormControl fullWidth>
+              <TextField
+                id="id-nro-doc"
+                name='id-nro-doc'
+                label='Número de Comprobante'
+                variant="outlined"
+                size='small'
+              />
+            </FormControl>
+            <FormControl fullWidth>
               <InputLabel id="id-estado-contable-label">Estado Contable</InputLabel>
               <Select
                 labelId="id-estado-contable-label"
                 id="id-estado-contable"
                 name ="id-estado-contable"
+                size='small'
                 value={emittedDocument}
                 label="Estado Contable"
                 onChange={onChangeEstadoContable}
               >
                 <MenuItem value="all">Todas</MenuItem>
-                <MenuItem value={true as any}>Emitida</MenuItem>
-                <MenuItem value={false as any}>No Emitida</MenuItem>
+                <MenuItem value={true as any}>Procesado</MenuItem>
+                <MenuItem value={false as any}>No Procesado</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -240,6 +263,7 @@ export default function PurchaseListView() {
                 name ="id-metodo-pago"
                 value={hasCredit}
                 label="Método de Pago"
+                size='small'
                 onChange={onChangeMetodoPago}
               >
                 <MenuItem value="all">Todas</MenuItem>

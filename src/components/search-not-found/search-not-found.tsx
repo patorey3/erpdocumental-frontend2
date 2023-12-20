@@ -22,9 +22,8 @@ export default function SearchNotFound({ query, sx, ...other }: Props) {
       </Typography>
 
       <Typography variant="body2">
-        No results found for &nbsp;
+        No hay resultados para &nbsp;
         <strong>&quot;{query}&quot;</strong>.
-        <br /> Try checking for typos or using complete words.
       </Typography>
     </Paper>
   ) : (

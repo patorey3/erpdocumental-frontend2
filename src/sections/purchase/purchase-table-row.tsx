@@ -57,10 +57,8 @@ export default function PurchaseTableRow({
   const popover = usePopover();
 
   const [open, setOpen] = useState(false);
-  console.log('localStorageGetItem',localStorageGetItem('doc-catalog'));
 
     const catalog = JSON.parse(localStorageGetItem('doc-catalog') ?? '{ type_docs: [] }');
-    console.log('catalog',catalog);
     const objCatalog = catalog;
  
   
@@ -98,7 +96,7 @@ export default function PurchaseTableRow({
         <TableCell align="right">{Number(total).toFixed(2)}</TableCell>
         <TableCell align="center">{hasCredit ? 'CRÉDITO' : 'CONTADO'}</TableCell>
         <TableCell align="center">
-          {accountableStatus === 'NotEmmited' ? 'NO EMITIDA' : 'EMITIDA'}
+          {accountableStatus === 'NotEmmited' ? 'NO PROCESADO' : 'PROCESADO'}
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1 }}>

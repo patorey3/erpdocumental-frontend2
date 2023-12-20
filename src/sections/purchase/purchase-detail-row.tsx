@@ -164,8 +164,8 @@ export default function PurchaseDetailRow({ purchase }: Props) {
             ))}
           </Tabs>
           <TabPanel value={TABS_OPTIONS[0].value}>
-            <Typography variant="h5">Información Documental</Typography>
-            <Divider flexItem orientation="horizontal" sx={{ border: '0.5px solid #dddddd ' }} />
+            <Typography style={{fontSize:'15px', color:'#7E7E7E'}}>Información Documental</Typography>
+            <Divider flexItem orientation="horizontal" sx={{ border: '0.5px solid #919EAB ' }} />
             <Stack
               direction={{ xs: 'column', md: 'row' }}
               divider={<Divider flexItem orientation="horizontal" sx={{ borderStyle: 'solid' }} />}
@@ -173,48 +173,48 @@ export default function PurchaseDetailRow({ purchase }: Props) {
             >
               <Stack sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">Categoría Documental</Typography>
-                  <Typography variant="body2">COMPRA</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Categoría Documental</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>COMPRA</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Documento de Requisición</Typography>
-                  <Typography variant="body2">00120304</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Documento de Requisición</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>00120304</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">¿Está Procesado?</Typography>
-                  <Typography variant="body2">
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>¿Está Procesado?</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>
                     {purchase.accountableStatus === 'NotEmmited' ? 'NO' : 'SI'}
                   </Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">Relación Documental</Typography>
-                  <Typography variant="body2">{renderTipoDoc(purchase.documentModelId)}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Relación Documental</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{renderTipoDoc(purchase.documentModelId)}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Usuario de Sistema</Typography>
-                  <Typography variant="body2">Nombre de Usuario</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Usuario de Sistema</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>Nombre de Usuario</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">¿Está Procesado?</Typography>
-                  <Typography variant="body2">NO</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>¿Está Procesado?</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>NO</Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">ID Documental</Typography>
-                  <Typography variant="body2">{purchase.documentId}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>ID Documental</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.documentId}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Fecha de Registro</Typography>
-                  <Typography variant="body2">
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Fecha de Registro</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>
                     {format(new Date(purchase.created ?? ''), 'dd/MM/yyyy')}
                   </Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Fecha de Conciliación</Typography>
-                  <Typography variant="body2">01/01/2023</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Fecha de Conciliación</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>01/01/2023</Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
@@ -300,15 +300,15 @@ export default function PurchaseDetailRow({ purchase }: Props) {
                   </Button>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Fecha de Procesado</Typography>
-                  <Typography variant="body2">
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Fecha de Procesado</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>
                     {format(new Date(purchase.transactionDate ?? ''), 'dd/MM/yyyy')}
                   </Typography>
                 </Stack>
               </Stack>
             </Stack>
-            <Typography variant="h5">Información de Contacto</Typography>
-            <Divider flexItem orientation="horizontal" sx={{ border: '0.5px solid #dddddd ' }} />
+            <Typography style={{fontSize:'15px', color:'#7E7E7E'}}>Información de Contacto</Typography>
+            <Divider flexItem orientation="horizontal" sx={{ border: '0.5px solid #919EAB ' }} />
             <Stack
               direction={{ xs: 'column', md: 'row' }}
               divider={<Divider flexItem orientation="horizontal" sx={{ borderStyle: 'solid' }} />}
@@ -316,17 +316,17 @@ export default function PurchaseDetailRow({ purchase }: Props) {
             >
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={5} sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">Razón Social</Typography>
-                  <Typography variant="body2">{purchase.partner.name}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Razón Social</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.partner.name}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">RUC/Cédula</Typography>
-                  <Typography variant="body2">{purchase.partner.cC_RUC_DNI}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>RUC/Cédula</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.partner.cC_RUC_DNI}</Typography>
                 </Stack>
               </Stack>
             </Stack>
-            <Typography variant="h5">Información de Comprobante</Typography>
-            <Divider flexItem orientation="horizontal" sx={{ border: '0.5px solid #dddddd ' }} />
+            <Typography style={{fontSize:'15px', color:'#7E7E7E'}}>Información de Comprobante</Typography>
+            <Divider flexItem orientation="horizontal" sx={{ border: '0.5px solid #919EAB ' }} />
             <Stack
               direction={{ xs: 'column', md: 'row' }}
               divider={<Divider flexItem orientation="horizontal" sx={{ borderStyle: 'solid' }} />}
@@ -334,38 +334,38 @@ export default function PurchaseDetailRow({ purchase }: Props) {
             >
               <Stack sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">Serie</Typography>
-                  <Typography variant="body2">{purchase.sriSerieNumber}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Serie</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.sriSerieNumber}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Nro de Autorización</Typography>
-                  <Typography variant="body2">{purchase.sriAuthorization}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Nro de Autorización</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.sriAuthorization}</Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">Número Comprobante</Typography>
-                  <Typography variant="body2">{purchase.referenceNumber}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Número Comprobante</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.referenceNumber}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Fecha de Comprobante</Typography>
-                  <Typography variant="body2">
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Fecha de Comprobante</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>
                     {format(new Date(purchase.transactionDate ?? ''), 'dd/MM/yyyy')}
                   </Typography>
                 </Stack>
               </Stack>
               <Stack sx={{ width: 1 }}>
                 <Stack>
-                  <Typography variant="subtitle2">SubTotal</Typography>
-                  <Typography variant="body2">{purchase.subTotal}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>SubTotal</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.subTotal.toFixed(2)}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Impuesto</Typography>
-                  <Typography variant="body2">{purchase.taxAmount}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Impuesto</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.taxAmount.toFixed(2)}</Typography>
                 </Stack>
                 <Stack>
-                  <Typography variant="subtitle2">Total</Typography>
-                  <Typography variant="body2">{purchase.total}</Typography>
+                  <Typography style={{fontSize:'12px', color:'#7E7E7E'}}>Total</Typography>
+                  <Typography style={{fontSize:'13px', fontWeight:'bold', color:'#212B36'}}>{purchase.total.toFixed(2)}</Typography>
                 </Stack>
               </Stack>
             </Stack>

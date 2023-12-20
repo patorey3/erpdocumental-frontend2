@@ -27,7 +27,9 @@ import { ButtonStyle, ColorlibConnector, ColorlibStepIconRoot } from './styles/s
 type Props = {
   item: IItemToCreate | undefined;
   onClose: VoidFunction;
-  setItemTable: VoidFunction;
+  onComeSri?: boolean;
+  setItemTable?: VoidFunction;
+  setMyVar?: (value: any) => void
 };
 
 interface ITaxes {
@@ -83,7 +85,7 @@ function ColorlibStepIcon(props: StepIconProps) {
   );
 }
 
-function SriRelatedItems({ item, onClose, setItemTable }: Props) {
+function SriRelatedItems({ item, onClose, onComeSri = true, setItemTable, setMyVar }: Props) {
   const settings = useSettingsContext();
   const [valueName, setValueName] = useState<string>('');
   const [itemToCreate, setItemToCreate] = useState<ICollectionItem>(itemCollectionInitialState);
@@ -232,6 +234,7 @@ function SriRelatedItems({ item, onClose, setItemTable }: Props) {
   const onSubmit = handleSubmit(async (data: any) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
+
       //  reset();
       // enqueueSnackbar(currentProduct ? 'Update success!' : 'Create success!');
       // router.push(paths.dashboard.product.root);
@@ -239,9 +242,23 @@ function SriRelatedItems({ item, onClose, setItemTable }: Props) {
         item.itemId = values.itemId ?? 0;
         item.itemName = values.itemName;
         item.itemBarCode = values.itemBarCode ?? '';
+        if(setMyVar){
+          setMyVar({
+            partnerId: item.partnerId,
+            cC_RUC_DNI: values.cC_RUC_DNI,
+            name: values.name,
+            itemId: values.itemId,
+            itemName: values.itemName,
+            itemBarCode: values.itemBarCode,
+            productCode: values.productCode,
+            description: values.description,
+           })
+        }
       }
       console.log('setItemToRelated');
-      setItemTable();
+      if(setItemTable){
+        setItemTable();
+      }
       onClose();
       //  setValue('sriSerieNumber', values.sriSerieNumber);
     } catch (error) {
@@ -299,8 +316,8 @@ function SriRelatedItems({ item, onClose, setItemTable }: Props) {
                     <RHFTextField disabled name="name" label="Razón Social" value={values.name} />
                   </Stack>
                   <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 1 }}>
-                    <RHFTextField disabled name="productCode" label="Código Consultado" />
-                    <RHFTextField disabled name="description" label="Descripción Consultado" />
+                    <RHFTextField disabled={onComeSri} name="productCode" label="Código Consultado" />
+                    <RHFTextField disabled={onComeSri} name="description" label="Descripción Consultado" />
                   </Stack>
                   <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 1 }}>
                     <div style={{ width: '100%' }}>
@@ -359,6 +376,7 @@ function SriRelatedItems({ item, onClose, setItemTable }: Props) {
         </>
       ) : (
         <>
+        {activeStep}
         <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
         {STEPS.map((label) => (
           <Step key={label}>

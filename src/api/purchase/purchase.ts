@@ -19,4 +19,12 @@ export const purchase = {
     const response = await instance.get(`${endpoint}/purchase/${documentId}`);
     return response.data.data;
   },
+  createPurchase(purchaseReg: any) {
+    return instance.post(`${endpoint}`, purchaseReg);
+  },
+
+  async updatePurchase(purchaseReg: any, documentId: string) {
+    const response = await instance.put(`${endpoint}/purchase/${documentId}`, purchaseReg);
+    return response.data;
+  },
 };

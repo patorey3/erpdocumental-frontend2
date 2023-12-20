@@ -57,7 +57,6 @@ export default function SriItemList({ items, itemHasChanged }: Props) {
 
   useEffect(() => {
     setItemState(items);
-    console.log('itemsitemsitems',items)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 

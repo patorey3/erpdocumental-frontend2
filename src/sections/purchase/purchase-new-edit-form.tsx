@@ -14,6 +14,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useMutationUpdatePurchase } from 'src/hooks/use-purchase';
 
 import { localStorageGetItem } from 'src/utils/storage-available';
 
@@ -51,8 +52,7 @@ const TABS_OPTIONS = [
 export default function PurchaseNewEditForm({ currentPurchase }: Props) {
   const router = useRouter();
   const [providers, setProviders] = useState<IProviderCatalog[]>([]);
-
-
+  const [purchase, setPurchase] = useState<any>({});
 
   const [optionTab, setOptionTab] = useState(TABS_OPTIONS[0]);
 
@@ -90,21 +90,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
     sriAuthorization: Yup.string().required('Autorización es requerido'),
     total: Yup.number().min(0.01).required('Total es requerido'),
     details: Yup.array(),    
-    // dueDate: Yup.mixed<any>()
-    //   .required('Due date is required')
-    //   .test(
-    //     'date-min',
-    //     'Due date must be later than create date',
-    //     (value, { parent }) => value.getTime() > parent.createDate.getTime()
-    //   ),
-    // // not required
-    // taxes: Yup.number(),
-    // status: Yup.string(),
-    // discount: Yup.number(),
-    // shipping: Yup.number(),
-    // invoiceFrom: Yup.mixed(),
-    // totalAmount: Yup.number(),
-    // invoiceNumber: Yup.string(),
+    name: Yup.string(),
   });
 
   const defaultValues = useMemo(
@@ -130,25 +116,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
       sriAuthorization: currentPurchase?.sriAuthorization ?? '',
       total: currentPurchase?.total ?? 1,
       details: currentPurchase?.details ? currentPurchase.details : [],
-
-      // createDate: currentPurchase?.createDate || new Date(),
-      // dueDate: currentPurchase?.dueDate || null,
-      // taxes: currentPurchase?.taxes || 0,
-      // shipping: currentPurchase?.shipping || 0,
-      // status: currentPurchase?.status || 'draft',
-      // discount: currentPurchase?.discount || 0,
-      // invoiceFrom: currentPurchase?.invoiceFrom || _addressBooks[0],
-      // items: currentPurchase?.items || [
-      //   {
-      //     title: '',
-      //     description: '',
-      //     service: '',
-      //     quantity: 1,
-      //     price: 0,
-      //     total: 0,
-      //   },
-      // ],
-      // totalAmount: currentPurchase?.totalAmount || 0,
+      name: currentPurchase?.partner.name ?? '',
     }),
     [currentPurchase]
   );
@@ -156,18 +124,25 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
   const methods = useForm({
     resolver: yupResolver(NewPurchaseSchema),
     defaultValues,
+     
   });
 
   const {
-    reset,
+    reset,    
     clearErrors,
     watch,
+    trigger,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isValid },
   } = methods;
 
   const values = watch();
+
+  const updatePurchaseMutation = useMutationUpdatePurchase(
+    purchase,
+    values.invoiceId?.toString() ?? '',
+  );
 
   const calcTotal = () =>
   // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
@@ -177,8 +152,51 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
     0
   );
 
+  const calcSubTotal = () =>
+  // return fields.reduce( (acc, cur) => acc = cur.subtotal, 0);
+  values?.details?.reduce(
+    (accumulator: number, item: any) =>
+      accumulator + item.subtotal ,
+    0
+  );
+
+
   const handleSaveAsDraft = handleSubmit(async (data) => {
-    console.info('DATA', JSON.stringify(data, null, 2));
+    // console.info('DATA', JSON.stringify(data, null, 2));
+    console.info('values', JSON.stringify(values, null, 2));
+    const subTotal = Number(Number(calcSubTotal() ?? 0).toFixed(2)) * 1;
+    const total = Number(Number(calcTotal() ?? 0).toFixed(2)) * 1;
+    const taxAmount = Number(Number(total - subTotal).toFixed(2)) * 1;
+    const {details} = values;
+    if (details){
+      for (let index = 0; index < details.length; index += 1) {
+        details[index].deleteTaxDetails = [];
+  }
+    }
+    const purchaseRegister: any = {
+      id: data.invoiceId,
+      partnerId: data.partnerId,
+      documentModelId: data.documentModelId,
+      sriSerieNumber: data.sriSerieNumber,
+      referenceNumber: data.referenceNumber,
+      sriAuthorization: data.sriAuthorization,
+      sriIssueDateLimit: null,
+      transactionDate: data.transactionDate,
+      created: data.create,
+      hasCredit: data.hasCredit,
+      daysForCredit: data.daysForCredit,
+      creditDateLimit: data.creditDateLimit,
+      nodeCityId: data.nodeCityId,
+      subTotal,
+      taxAmount,
+      total,
+      details,
+      delete: []
+    };
+
+    setPurchase(purchaseRegister);
+    console.log('purchaseRegister',purchase)
+    updatePurchaseMutation.mutate(purchase, purchase.id);
     /*
     const purchaseRegister : IPurchaseRegister = {
       id: data.documentId,
@@ -260,7 +278,10 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
       setValue('nodeCityId', currentPurchase.nodeCityId ?? 'c05010101');
       setValue('total', currentPurchase.total ?? 0);
       setValue('details', currentPurchase.details);
+      setValue('name', currentPurchase.partner.name);
+
       setProviders([provider]);
+      trigger()
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -277,6 +298,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
       setProviders([provider]);
       setValue('partnerId', provider.id);
       setValue('cC_RUC_DNI', provider.ruc);
+      setValue('name', provider.name);
       clearErrors('partnerId');
       clearErrors('cC_RUC_DNI');
     }
@@ -301,6 +323,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
               icon={<Iconify icon={tab.icon} />}
               value={tab.value}
               label={tab.label}
+              disabled={tab.value === 'detalle' && !isValid}
             />
           ))}
         </Tabs>
