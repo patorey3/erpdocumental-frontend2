@@ -31,11 +31,16 @@ const TABLE_HEAD = [
 
 export default function ContactList() {
   const [filter, setFilter] = useState('');
+  const [razonSocial, setRazonSocial] = useState('');
+  const [debouncedRazonSocial, setDebouncedRazonSocial] = useState<string>(razonSocial);
+
   const [sectorValue, setSectorValue] = useState('');
   const [debouncedSectorValue, setDebouncedSectorValue] = useState<string>(sectorValue);
   const [sectorList, setSectorList] = useState<any[]>([]);
 
   const [cityValue, setCityValue] = useState('');
+  const [codeCity, setCodeCity] = useState('');
+  const [codeSector, setCodeSector] = useState('');
   const [debouncedCityValue, setDebouncedCityValue] = useState<string>(cityValue);
   const [citiesList, setCitiesList] = useState<any[]>([]);
 
@@ -68,11 +73,23 @@ export default function ContactList() {
 
     return () => clearTimeout(timer);
   }, [cityValue]);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedRazonSocial(razonSocial), 500);
+
+    return () => clearTimeout(timer);
+  }, [razonSocial]);
+
+  useEffect(() => {
+    const parTipoContacto = tipoContacto==="all" ? "" : `&isPerson=${tipoContacto}`;
+    const CityId = codeCity==="" ? "" : `&CityId=${codeCity}`;
+    const SectorId = codeSector==="" ? "" : `&SectorId=${codeSector}`;
+    setFilter(`&Name=${debouncedRazonSocial}${parTipoContacto}${CityId}${SectorId}`)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedRazonSocial, tipoContacto,codeCity,codeSector])
+  
 
   useEffect(() => {
     if (queryCatalog.isFetched) {
-      console.log('queryCatalog', queryCatalog.data);
-      setFilter('');
       setTotalPages(queryCatalog.data.totalPages);
        const initResult = queryCatalog.data.data.map((contact: any) => ({
          id: contact.id,
@@ -88,7 +105,6 @@ export default function ContactList() {
        }));
       setContactList(initResult);
       setTableData(initResult);
-      setTipoContacto("all")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryCatalog.data]);
@@ -113,12 +129,30 @@ export default function ContactList() {
     table.onChangePage(event, newPage);
   };
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    switch (name) {
+      case 'id-razon-social':
+        setRazonSocial(value);
+        break;
+      case 'tipo-contacto':
+        break;
+      case 'sector':
+        break;  
+      case 'ubicacion':
+        break;
+
+      default:
+        break;
+    }
+  };
 
 
-if(queryCatalog.isLoading)  {
- return <LoadingScreen />
 
-}
+// if(queryCatalog.isLoading)  {
+//  return <LoadingScreen />
+
+// }
 
   return (
     <Card style={{ marginTop: '15px', marginBottom: '15px' }}>
@@ -140,6 +174,9 @@ if(queryCatalog.isLoading)  {
             name="id-razon-social"
             label="Razón Social"
             variant="outlined"
+            autoFocus
+            value={razonSocial}
+            onChange={handleInputChange}
             size="small"
             InputProps={{
               startAdornment: (
@@ -169,9 +206,9 @@ if(queryCatalog.isLoading)  {
         <FormControl fullWidth>
         <Autocomplete
             disablePortal
-            id="combo-ubicación"
+            id="combo-ubicacion"
             size="small"
-            onChange={(event, newVal)=>console.log(newVal)}
+            onChange={(event, newVal)=> setCodeCity(newVal.id)}
             getOptionLabel={(option) => option.name}
             options={citiesList}
             groupBy={(option) => option.parentId}
@@ -181,7 +218,7 @@ if(queryCatalog.isLoading)  {
               </Box>
             )}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Ubicación" value={cityValue} onChange={(e: any)=>setCityValue(e.target.value)} />}
+            renderInput={(params) => <TextField {...params} label="Ubicación" name="ubicacion" value={cityValue} onChange={(e: any)=>setCityValue(e.target.value)} />}
           />
         </FormControl>
         <FormControl fullWidth>
@@ -189,7 +226,7 @@ if(queryCatalog.isLoading)  {
             disablePortal
             id="combo-sector"
             size="small"
-            onChange={(event, newVal)=>console.log(newVal)}
+            onChange={(event, newVal)=>setCodeSector(newVal.id)}
             getOptionLabel={(option) => option.name}
             options={sectorList}
             groupBy={(option) => option.parentId}
@@ -199,10 +236,13 @@ if(queryCatalog.isLoading)  {
               </Box>
             )}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Sector Económico" value={sectorValue} onChange={(e: any)=>setSectorValue(e.target.value)} />}
+            renderInput={(params) => <TextField {...params} label="Sector Económico"             name="sector" value={sectorValue} onChange={(e: any)=>setSectorValue(e.target.value)} />}
           />
         </FormControl>
       </Stack>
+      {
+        queryCatalog.isLoading && <LoadingScreen />
+      }
       <TableContainer sx={{ position: 'relative', overflow: 'unset', backgroundColor: '#FFFFFF' }}>
         <Scrollbar>
           <Table size={table.dense ? 'small' : 'medium'} sx={{ maxWidth: '100%' }}>

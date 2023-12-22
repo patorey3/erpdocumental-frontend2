@@ -40,6 +40,7 @@ export const useCatalogContact = (page: number = 1, pageSize: number = 10, filte
   useQuery({
     queryKey: [key_contact_catalog, page, pageSize, filter],
     queryFn: getContactListRQ,
+    staleTime: Infinity,
   });
 
 export const useSectorCatalog = (name: string = '') =>
