@@ -119,6 +119,11 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/user/${MOCK_ID}/edit`,
       },
     },
+    contact: {
+      root: `${ROOTS.DASHBOARD}/contact`,
+      new: `${ROOTS.DASHBOARD}/contact/new`,
+      list: `${ROOTS.DASHBOARD}/contact/list`,
+    },
     product: {
       root: `${ROOTS.DASHBOARD}/product`,
       new: `${ROOTS.DASHBOARD}/product/new`,

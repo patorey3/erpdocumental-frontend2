@@ -96,11 +96,12 @@ export function useNavData() {
           // USER
           {
             title: t('business_relationship'),
-            path: paths.dashboard.user.root,
+            path: paths.dashboard.contact.root,
             icon: ICONS.user,
             children: [
-              { title: t('contacts'), path: paths.dashboard.user.root },
-              { title: t('docs_flows'), path: paths.dashboard.user.cards },
+              { title: t('contacts'), path: paths.dashboard.contact.root },
+              { title: t('crm_docs'), path: paths.dashboard.contact.list },
+              { title: t('docs_flows'), path: paths.dashboard.contact.list },
               // { title: t('list'), path: paths.dashboard.user.list },
               // { title: t('create'), path: paths.dashboard.user.new },
               // { title: t('edit'), path: paths.dashboard.user.demo.edit },

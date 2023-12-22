@@ -50,6 +50,7 @@ export default function OverviewAppView() {
   const [catalogCities, setCatalogCities] = useState([]);
 
   const queryCatalog = useListDocCatalog('Purchase');
+  
 
   const queryCitiesCatalog= useCatalogCitiesCollection();
 
@@ -73,6 +74,7 @@ export default function OverviewAppView() {
     initialListFormFilters
   );
 
+  
   useEffect(() => {
     if (queryCatalog.isFetched) {
       const cat = queryCatalog.data.map((item: any) => ({
@@ -85,6 +87,8 @@ export default function OverviewAppView() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryCatalog.data]);
+
+
 
   useEffect(() => {
     if (queryCitiesCatalog.isFetched) {

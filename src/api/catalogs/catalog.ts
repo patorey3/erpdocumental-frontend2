@@ -49,6 +49,15 @@ export const getCatalogCitiesRQ = async () => {
   return response.data.data;
 };
 
+export const getCatalogCitiesByNameRQ = async (queryKey: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, name] = queryKey.queryKey;
+  const response = await instance.get(
+    `${partnerCollectionEndpoint}/locationsCollection?Name=${name}`
+  );
+  return response.data;
+};
+
 export const getContactListRQ = async (queryKey: any) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, page, pageSize, filter] = queryKey.queryKey;
@@ -56,6 +65,22 @@ export const getContactListRQ = async (queryKey: any) => {
     `${contactEndpoint}?PageIndex=${page}&PageSize=${pageSize}${filter}`
   );
   return response.data;
+};
+
+export const getSectorListRQ = async (queryKey: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, name] = queryKey.queryKey;
+  const response = await instance.get(
+    `${partnerCollectionEndpoint}/sectorsCollection?IsSector=true&Name=${name}`
+  );
+  return response.data;
+};
+
+export const getEnterpriseInfoRQ = async (queryKey: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, enterpriseId] = queryKey.queryKey;
+  const response = await instance.get(`${contactEndpoint}/${enterpriseId}`);
+  return response.data.data;
 };
 
 export const getTaxesCollectionPercentsRQ = async () => {

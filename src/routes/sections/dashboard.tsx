@@ -58,6 +58,8 @@ const SriEditPurchasePage = lazy(() => import('src/pages/dashboard/utils/edit'))
 const PurchaseListPage = lazy(() => import('src/pages/dashboard/purchase/list'));
 const PurchaseCreatePage = lazy(() => import('src/pages/dashboard/purchase/new'));
 const PurchaseEditPage = lazy(() => import('src/pages/dashboard/purchase/edit'));
+// CONTACT
+const ContactListPage = lazy(() => import('src/pages/dashboard/contact/list'));
 
 
 // FILE MANAGER
@@ -105,6 +107,14 @@ export const dashboardRoutes = [
           { path: 'account', element: <UserAccountPage /> },
         ],
       },
+      {
+        path: 'contact',
+        children: [
+          { element: <ContactListPage />, index: true },
+          { path: 'new', element: <UserCreatePage /> },
+          { path: 'list', element: <UserListPage /> },
+        ],
+      },      
       {
         path: 'product',
         children: [

@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 
 import {
+  getSectorListRQ,
   getContactListRQ,
   getCatalogCitiesRQ,
   getAllDocumentModelType,
   getItemsPurchasesByName,
+  getCatalogCitiesByNameRQ,
   getCatalogItemCollectionRQ,
   getItemsPurchasesByBarCode,
   getTaxesCollectionPercentsRQ,
@@ -14,9 +16,11 @@ const key = 'doc-catalog-list';
 const key_item_collection = 'catalog-itemcollection';
 const key_contact_catalog = 'catalog-contact';
 const key_cities_catalog = 'catalog-cities';
+const key_cities_catalog_by_name = 'catalog-cities-by-name';
 const key_taxes_catalog = 'catalog-taxes';
 const key_item_by_barcode = 'catalog-item-barcode';
 const key_item_by_name = 'catalog-item-name';
+const key_sector = 'catalog-sector';
 
 export const useListDocCatalog = (invoiceType: string) =>
   useQuery({
@@ -36,6 +40,22 @@ export const useCatalogContact = (page: number = 1, pageSize: number = 10, filte
   useQuery({
     queryKey: [key_contact_catalog, page, pageSize, filter],
     queryFn: getContactListRQ,
+  });
+
+export const useSectorCatalog = (name: string = '') =>
+  useQuery({
+    queryKey: [key_sector, name],
+    enabled: name !== '',
+    queryFn: getSectorListRQ,
+    staleTime: Infinity,
+  });
+
+export const useCatalogCitiesCollectionByName = (name: string = '') =>
+  useQuery({
+    queryKey: [key_cities_catalog_by_name, name],
+    queryFn: getCatalogCitiesByNameRQ,
+    enabled: name !== '',
+    staleTime: Infinity,
   });
 
 export const useCatalogCitiesCollection = () =>

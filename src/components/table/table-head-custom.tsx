@@ -45,7 +45,7 @@ export default function TableHeadCustom({
 }: Props) {
 
   return (
-    <TableHead sx={sx}>
+    <TableHead sx={sx} >
       <TableRow key="tk-1235" >
         {onSelectAllRows && (
           <TableCell padding="checkbox">

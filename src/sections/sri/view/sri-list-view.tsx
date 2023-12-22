@@ -15,7 +15,6 @@ import { useLocalStorage } from 'src/hooks/use-local-storage';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { useSettingsContext } from 'src/components/settings';
 import { LoadingScreen } from 'src/components/loading-screen';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs/custom-breadcrumbs';
 import { useTable, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
@@ -53,7 +52,6 @@ export default function SriListView() {
 
   const { state : docCatalog , update: updateCatalog } = useLocalStorage(STORAGE_KEY, initialCatalogState);
 // , update: updateCatalog
-  const settings = useSettingsContext();
   const { enqueueSnackbar } = useSnackbar();
 
   // const router = useRouter();
@@ -124,8 +122,8 @@ export default function SriListView() {
   };
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <CustomBreadcrumbs
+<Container style={{ maxWidth: '1400px', backgroundColor:'#EDF1F6' }}>
+        <CustomBreadcrumbs
         heading="Consultas SRI"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },

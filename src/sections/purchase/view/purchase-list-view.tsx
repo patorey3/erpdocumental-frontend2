@@ -152,7 +152,7 @@ export default function PurchaseListView() {
 
   return (
     <>
-      <Container style={{ maxWidth: '1400px' }}>
+      <Container style={{ maxWidth: '1400px' , backgroundColor:'#EDF1F6'}}>
         <CustomBreadcrumbs
           heading="Lista de Compras"
           links={[
