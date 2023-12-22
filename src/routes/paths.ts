@@ -121,7 +121,7 @@ export const paths = {
     },
     contact: {
       root: `${ROOTS.DASHBOARD}/contact`,
-      new: `${ROOTS.DASHBOARD}/contact/new`,
+      person: `${ROOTS.DASHBOARD}/contact/new-person`,
       list: `${ROOTS.DASHBOARD}/contact/list`,
     },
     product: {

@@ -6,6 +6,7 @@ import {
   getCatalogCitiesRQ,
   getAllDocumentModelType,
   getItemsPurchasesByName,
+  getIdentityDocumentType,
   getCatalogCitiesByNameRQ,
   getCatalogItemCollectionRQ,
   getItemsPurchasesByBarCode,
@@ -21,6 +22,7 @@ const key_taxes_catalog = 'catalog-taxes';
 const key_item_by_barcode = 'catalog-item-barcode';
 const key_item_by_name = 'catalog-item-name';
 const key_sector = 'catalog-sector';
+const key_document = 'catalog-document';
 
 export const useListDocCatalog = (invoiceType: string) =>
   useQuery({
@@ -86,4 +88,11 @@ export const useItemByName = (name: string) =>
     queryKey: [key_item_by_name, name],
     enabled: name !== '',
     queryFn: getItemsPurchasesByName,
+  });
+
+export const useIdentityDocumentType = () =>
+  useQuery({
+    queryKey: [key_document],
+    queryFn: getIdentityDocumentType,
+    staleTime: Infinity,
   });

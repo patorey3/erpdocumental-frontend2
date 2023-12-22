@@ -6,6 +6,7 @@ const itemCollectioniEndpoint = 'ItemCollection';
 const contactEndpoint = 'Partners';
 const partnerCollectionEndpoint = 'PartnerCollection';
 const taxesCollectionEndpoint = 'TaxesCollection';
+const IdentityDocumentTypeEndpoint = 'IdentityDocumentType';
 
 export const getAllDocumentModelType = async (queryKey: any) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -86,5 +87,10 @@ export const getEnterpriseInfoRQ = async (queryKey: any) => {
 export const getTaxesCollectionPercentsRQ = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const response = await instance.get(`${taxesCollectionEndpoint}/percents`);
+  return response.data.data;
+};
+
+export const getIdentityDocumentType = async () => {
+  const response = await instance.get(`${IdentityDocumentTypeEndpoint}`);
   return response.data.data;
 };
