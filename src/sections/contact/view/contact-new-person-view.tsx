@@ -15,7 +15,7 @@ export default function ContactNewPersonView() {
  // const settings = useSettingsContext();
 
   return (
-    <Container style={{ maxWidth: '1400px', backgroundColor: '#EDF1F6' }}>
+    <Container style={{ maxWidth: '1400px' }}>
       <CustomBreadcrumbs
         heading="Crear Nuevo Contacto"
         links={[

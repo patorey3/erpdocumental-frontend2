@@ -55,7 +55,7 @@ export default function ContactTableRow({
 
   return (
     <>
-      <TableRow hover>
+      <TableRow key={row.id} hover>
         <TableCell>{rowNumber}</TableCell>
         <TableCell align="left">
           <Stack>
@@ -70,7 +70,7 @@ export default function ContactTableRow({
           </Label>
         </TableCell>
         <TableCell>
-        <Typography sx={{ fontSize: '12px', color:'#212B36', lineHeight:'18px', fontWeight: '400' }}>{empleados}</Typography>
+        <Typography sx={{ fontSize: '12px', color:'#212B36', lineHeight:'18px', fontWeight: '400' }}>{`${empleados.length} Contactos Asociados` }</Typography>
         </TableCell>
         <TableCell>
         <Typography sx={{ fontSize: '12px', color:'#212B36', lineHeight:'18px', fontWeight: '400' }}>{ubication}</Typography>

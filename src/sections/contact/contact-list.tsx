@@ -98,10 +98,10 @@ export default function ContactList() {
          address: contact.address,
          email: contact.email,
          phone: contact.phone,
-         empleados: '',
-         sector: contact.sectorId,
+         empleados: contact.employees,
+         sector: contact.sector ? contact.sector.name : 'SIN SECTOR',
          isPerson: contact.isPerson,
-         ubication: contact.cityId
+         ubication: contact.city.name
        }));
       setContactList(initResult);
       setTableData(initResult);

@@ -25,7 +25,7 @@ export default function ContactView() {
   };
 
   return (
-    <Container style={{ maxWidth: '1400px', backgroundColor: '#EDF1F6' }}>
+    <Container style={{ maxWidth: '1400px'}}>
       <CustomBreadcrumbs
         heading="Lista de Contactos"
         links={[

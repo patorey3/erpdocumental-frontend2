@@ -328,7 +328,7 @@ export default function PurchaseNewEditForm({ currentPurchase }: Props) {
           ))}
         </Tabs>
         <TabPanel value={TABS_OPTIONS[0].value}>
-          <Typography variant="h6" style={{ paddingBottom: '10px' }}>
+          <Typography variant="h6" style={{ paddingBottom: '10px'}}>
             Información Documental
           </Typography>
           <Grid container columnSpacing={2}>

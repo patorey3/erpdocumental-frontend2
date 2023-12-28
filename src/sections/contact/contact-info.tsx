@@ -21,6 +21,7 @@ interface IContactInfo {
   email: string;
   accountId: string;
   c_imagen: string;
+  employees: any[];
 }
 
 const enterpriseDefault: IContactInfo = {
@@ -33,6 +34,7 @@ const enterpriseDefault: IContactInfo = {
   email: '',
   accountId: '',
   c_imagen: '',
+  employees: [],
 };
 
 export default function ContactInfo() {
@@ -53,6 +55,7 @@ export default function ContactInfo() {
         email: queryEnterprise.data.email,
         accountId: queryEnterprise.data.accountId,
         c_imagen: queryEnterprise.data.c_imagen,
+        employees: queryEnterprise.data.employees,
       });
       console.log('enterprise', enterprise);
     }
@@ -125,7 +128,7 @@ export default function ContactInfo() {
             justifyItems: 'center',
           }}
         >          
-                    <Typography sx={{ fontSize: '14px', color:'#212B36', lineHeight:'22px', fontWeight: '400' }}>Contactos</Typography>
+                    <Typography sx={{ fontSize: '14px', color:'#212B36', lineHeight:'22px', fontWeight: '400' }}>{enterprise.employees ? `${enterprise.employees.length} Contactos` : '0 Contactos'}</Typography>
         </Grid>
         <Grid
           item

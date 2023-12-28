@@ -23,6 +23,7 @@ export default function Main({ children, sx, ...other }: BoxProps) {
     return (
       <Box
         component="main"
+        style={{backgroundColor: `!important red`}}
         sx={{
           minHeight: 1,
           display: 'flex',
