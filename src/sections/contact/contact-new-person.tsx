@@ -11,6 +11,7 @@ import { LoadingButton } from '@mui/lab';
 import { DatePicker } from '@mui/x-date-pickers';
 import { Box, Card, Grid, MenuItem, TextField, Typography, Autocomplete } from '@mui/material';
 
+import { useMutationCreateContact } from 'src/hooks/use-contact';
 import { useIdentityDocumentType, useCatalogCitiesCollectionByName } from 'src/hooks/use-catalog';
 
 import FormProvider, { RHFSelect, RHFCheckbox, RHFTextField } from 'src/components/hook-form';
@@ -32,11 +33,14 @@ export default function ContacNewPerson({ currentContact }: Props) {
   const [documentsType, setDocumentsType] = useState([]);
 
   const [cityValue, setCityValue] = useState('');
+  const [contact, setContact] = useState();
   const [codeCity, setCodeCity] = useState('c05010101');
   const [debouncedCityValue, setDebouncedCityValue] = useState<string>(cityValue);
   const [citiesList, setCitiesList] = useState<any[]>([]);
-
-  console.log('codeCity', codeCity);
+  console.log('codeCity',codeCity)
+  const createContactMutation = useMutationCreateContact(
+    contact
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedCityValue(cityValue), 500);
@@ -157,10 +161,11 @@ export default function ContacNewPerson({ currentContact }: Props) {
   }, [queryTypeDocument.data]);
   console.log('Values', values);
 
-  const handleSaveContact = handleSubmit(async (data) => {
+  const handleSaveContact = handleSubmit(async (data: any) => {
     // console.info('DATA', JSON.stringify(data, null, 2));
     console.info('values', JSON.stringify(values, null, 2));
-
+    setContact(data);
+    createContactMutation.mutate(contact);
     /*
     const purchaseRegister : IPurchaseRegister = {
       id: data.documentId,

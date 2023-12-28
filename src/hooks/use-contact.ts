@@ -1,8 +1,7 @@
-// import { enqueueSnackbar } from 'notistack';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { enqueueSnackbar } from 'notistack';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
-import { getEnterpriseInfoRQ } from 'src/api/catalogs/catalog';
+import { createContact, getEnterpriseInfoRQ } from 'src/api/catalogs/catalog';
 
 const key = 'contact';
 
@@ -17,11 +16,12 @@ export const useEnterpriseInfo = (enterpriseId: string) =>
     queryFn: getEnterpriseInfoRQ,
   });
 
-  export const useMutationCreateContact = (contactReg: any) =>
-  //  const queryClient = useQueryClient();
+export const useMutationCreateContact = (contactReg: any) =>
+  // const queryClient = useQueryClient();
   useMutation({
-    mutationFn: () => purchase.createPurchase(purchaseReg),
+    mutationFn: () => createContact(contactReg),
     onSuccess: () => {
+      // queryClient.invalidateQueries(key);
       enqueueSnackbar('Contacto Creado Satisfactoriamente!', {
         variant: 'success',
       });

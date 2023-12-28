@@ -42,7 +42,7 @@ export default function ContactTableRow({
     ruc,
     name,
     empleados,
-    // address,
+    c_activo,
     email,
     phone,
     sector,
@@ -83,6 +83,11 @@ export default function ContactTableRow({
           </Stack>
 
           
+        </TableCell>
+        <TableCell align="center">
+        <Label variant="soft" color={c_activo ? 'info' : 'warning'}>
+            {c_activo ? 'Activo' : 'Inactivo'}
+          </Label>
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1 }}>

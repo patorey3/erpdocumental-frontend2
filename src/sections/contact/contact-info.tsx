@@ -52,7 +52,7 @@ export default function ContactInfo() {
         isPerson: queryEnterprise.data.isPerson,
         sector: queryEnterprise.data.sector.name,
         phone: queryEnterprise.data.phone,
-        email: queryEnterprise.data.email,
+        email: queryEnterprise.data.emailBilling,
         accountId: queryEnterprise.data.accountId,
         c_imagen: queryEnterprise.data.c_imagen,
         employees: queryEnterprise.data.employees,

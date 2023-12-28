@@ -25,6 +25,7 @@ const TABLE_HEAD = [
   { id: 'ubication', label: 'Ubicación', width: 120, align: 'center' },
   { id: 'sector', label: 'Sec. Económico', width: 145, align: 'center' },
   { id: 'sent', label: 'Correo/Teléfono', align: 'center' },
+  { id: 'c_activo', label: 'Status', align: 'center' },
   { id: '' },
 ];
 
@@ -96,11 +97,12 @@ export default function ContactList() {
          ruc: contact.cC_RUC_DNI,
          name: contact.name,
          address: contact.address,
-         email: contact.email,
+         email: contact.emailBilling,
          phone: contact.phone,
          empleados: contact.employees,
          sector: contact.sector ? contact.sector.name : 'SIN SECTOR',
          isPerson: contact.isPerson,
+         c_activo: contact.c_activo,
          ubication: contact.city.name
        }));
       setContactList(initResult);

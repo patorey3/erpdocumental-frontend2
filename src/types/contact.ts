@@ -9,6 +9,7 @@ export interface IContact {
   sector: string;
   isPerson: boolean;
   ubication: string;
+  c_activo: boolean;
 }
 
 export interface IContactPerson {
