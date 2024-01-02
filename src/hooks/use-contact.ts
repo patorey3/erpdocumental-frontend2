@@ -1,5 +1,5 @@
 import { enqueueSnackbar } from 'notistack';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { createContact, updateContactById, getEnterpriseInfoRQ } from 'src/api/catalogs/catalog';
 
@@ -18,12 +18,13 @@ export const useEnterpriseInfo = (enterpriseId: string) =>
     queryFn: getEnterpriseInfoRQ,
   });
 
-export const useMutationCreateContact = (contactReg: IContactPerson) =>
-  // const queryClient = useQueryClient();
-  useMutation({
+export const useMutationCreateContact = (contactReg: IContactPerson) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: () => createContact(contactReg),
     onSuccess: () => {
-      // queryClient.invalidateQueries(key);
+      queryClient.invalidateQueries();
       enqueueSnackbar('Contacto Creado Satisfactoriamente!', {
         variant: 'success',
       });
@@ -42,13 +43,14 @@ export const useMutationCreateContact = (contactReg: IContactPerson) =>
       }
     },
   });
+};
 
-export const useMutationUpdateContact = (id: string, contactReg: IContactPerson) =>
-  // const queryClient = useQueryClient();
-  useMutation({
+export const useMutationUpdateContact = (id: string, contactReg: IContactPerson) => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: () => updateContactById(id, contactReg),
     onSuccess: () => {
-      // queryClient.invalidateQueries(key);
+      queryClient.invalidateQueries();
       enqueueSnackbar('Contacto Modificado Satisfactoriamente!', {
         variant: 'success',
       });
@@ -67,3 +69,4 @@ export const useMutationUpdateContact = (id: string, contactReg: IContactPerson)
       }
     },
   });
+};

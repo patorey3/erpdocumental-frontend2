@@ -25,7 +25,7 @@ export interface IContactPerson {
   dateOfBirth: string;
   isPerson: boolean;
   isActive: boolean;
-  priceList: string;
+  clientGroupId: string;
   created: string | null;
   parentContactId: number;
   c_oficina: string;

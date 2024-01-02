@@ -39,7 +39,7 @@ const emptyPerson: IContactPerson = {
     dateOfBirth: '0',
     isPerson: false,
     isActive: false,
-    priceList: '0',
+    clientGroupId: '0',
     created: '0',
     parentContactId: 0,
     c_oficina: '0',
@@ -110,7 +110,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
     dateOfBirth: Yup.mixed<any>(),
     isPerson: Yup.boolean(),
     isActive: Yup.boolean(),
-    priceList: Yup.string(),
+    clientGroupId: Yup.string(),
     created: Yup.mixed<any>(),
     parentContactId: Yup.number(),
     c_oficina: Yup.string(),
@@ -144,7 +144,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
       : new Date(),
       isPerson: currentContact?.isPerson ?? true,
       isActive: currentContact?.isActive ?? true,
-      priceList: currentContact?.priceList ?? '',
+      clientGroupId: currentContact?.clientGroupId ?? '',
       created: currentContact?.created
       ? new Date(currentContact.created)
       : new Date(),
@@ -265,7 +265,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
         "dateOfBirth": data.dateOfBirth,
         "isPerson": data.isPerson,
         "isActive": data.isActive,
-        "priceList": data.priceList,
+        "clientGroupId": data.clientGroupId,
         "created": data.created,
         "parentContactId": data.parentContactId,
         "c_oficina": data.c_oficina,
@@ -281,14 +281,14 @@ export default function ContacNewPerson({ currentContact }: Props) {
         "creditAmount": data.creditAmount ,
         "daysOfCredit": data.daysOfCredit ,
         "additionalInformation": data.additionalInformation,
-        "sectorId":   ""
+        "sectorId":   codeCity
       }
       setContact(contactRegister);
       if(contactRegister.id === 0){
         createContactMutation.mutate();
       }else{
         updateContactMutation.mutate(
-          contactRegister.id
+          contactRegister.id,
         );
       }
     } catch (error) {
@@ -472,7 +472,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
           </Grid>
           <Grid item xs={12} sm={5} md={4} style={{ paddingTop: '15px' }}>
             <Stack>
-              <RHFTextField name="priceList" label="Lista de Precios en Venta" />
+              <RHFTextField name="clientGroupId" label="Lista de Precios en Venta" />
             </Stack>
           </Grid>
           <Grid item xs={12} sm={5} md={2} style={{ paddingTop: '15px' }}>

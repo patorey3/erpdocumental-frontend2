@@ -39,7 +39,7 @@ export default function ContactEditPersonView({ id }: Props) {
       dateOfBirth: queryContact.data.dateOfBirth,
       isPerson: queryContact.data.isPerson,
       isActive: queryContact.data.isActive,
-      priceList: '0',
+      clientGroupId: '0',
       created: queryContact.data.created,
       parentContactId: queryContact.data.parentContactId,
       c_oficina: queryContact.data.c_oficina,
