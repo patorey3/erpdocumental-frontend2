@@ -1,7 +1,9 @@
 import { enqueueSnackbar } from 'notistack';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
-import { createContact, getEnterpriseInfoRQ } from 'src/api/catalogs/catalog';
+import { createContact, updateContactById, getEnterpriseInfoRQ } from 'src/api/catalogs/catalog';
+
+import { IContactPerson } from 'src/types/contact';
 
 const key = 'contact';
 
@@ -16,7 +18,7 @@ export const useEnterpriseInfo = (enterpriseId: string) =>
     queryFn: getEnterpriseInfoRQ,
   });
 
-export const useMutationCreateContact = (contactReg: any) =>
+export const useMutationCreateContact = (contactReg: IContactPerson) =>
   // const queryClient = useQueryClient();
   useMutation({
     mutationFn: () => createContact(contactReg),
@@ -35,6 +37,31 @@ export const useMutationCreateContact = (contactReg: any) =>
         });
       } else {
         enqueueSnackbar(`Ha ocurrido un error al Crear Contacto`, {
+          variant: 'warning',
+        });
+      }
+    },
+  });
+
+export const useMutationUpdateContact = (id: string, contactReg: IContactPerson) =>
+  // const queryClient = useQueryClient();
+  useMutation({
+    mutationFn: () => updateContactById(id, contactReg),
+    onSuccess: () => {
+      // queryClient.invalidateQueries(key);
+      enqueueSnackbar('Contacto Modificado Satisfactoriamente!', {
+        variant: 'success',
+      });
+    },
+    onError: (error: any) => {
+      console.log('Error', error);
+      const errorObject = error.response.data;
+      if (errorObject.Succeced === false) {
+        enqueueSnackbar(setErrorMessage(errorObject.Errors), {
+          variant: 'warning',
+        });
+      } else {
+        enqueueSnackbar(`Ha ocurrido un error al Modificar Contacto`, {
           variant: 'warning',
         });
       }

@@ -224,11 +224,11 @@ export function useNavData() {
           // },
 
           // KANBAN
-          // {
-          //   title: t('kanban'),
-          //   path: paths.dashboard.kanban,
-          //   icon: ICONS.kanban,
-          // },
+          {
+            title: t('kanban'),
+            path: paths.dashboard.kanban,
+            icon: ICONS.kanban,
+          },
         ],
       },
 

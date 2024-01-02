@@ -61,6 +61,7 @@ const PurchaseEditPage = lazy(() => import('src/pages/dashboard/purchase/edit'))
 // CONTACT
 const ContactListPage = lazy(() => import('src/pages/dashboard/contact/list'));
 const ContacNewPersonPage = lazy(() => import('src/pages/dashboard/contact/person'));
+const ContactEditPersonPage = lazy(() => import('src/pages/dashboard/contact/edit'));
 
 
 // FILE MANAGER
@@ -114,6 +115,7 @@ export const dashboardRoutes = [
           { element: <ContactListPage />, index: true },
           { path: 'new-person', element: <ContacNewPersonPage /> },
           { path: 'list', element: <UserListPage /> },
+          { path: ':id/edit-person', element: <ContactEditPersonPage /> },      
         ],
       },      
       {

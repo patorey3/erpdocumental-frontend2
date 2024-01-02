@@ -9,7 +9,7 @@ export interface IContact {
   sector: string;
   isPerson: boolean;
   ubication: string;
-  c_activo: boolean;
+  isActive: boolean;
 }
 
 export interface IContactPerson {
@@ -24,9 +24,9 @@ export interface IContactPerson {
   emailBilling: string;
   dateOfBirth: string;
   isPerson: boolean;
-  c_activo: boolean;
+  isActive: boolean;
   priceList: string;
-  dateOfCreation: string;
+  created: string | null;
   parentContactId: number;
   c_oficina: string;
   c_cargo: string;

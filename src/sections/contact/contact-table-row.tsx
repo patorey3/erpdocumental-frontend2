@@ -24,17 +24,18 @@ type Props = {
   // selected: boolean;
   // onSelectRow: VoidFunction;
   // onViewRow: VoidFunction;
-  // onEditRow: (id: string) => void;
+  onEditRow: (id: string, isPerson: boolean) => void;
   // onDeleteRow: VoidFunction;
 };
 
 export default function ContactTableRow({
   row,
   rowNumber,
+  onEditRow,
+
 } // selected,
 // onSelectRow,
 // onViewRow,
-// onEditRow,
 // onDeleteRow,
 : Props) {
   const {
@@ -42,7 +43,7 @@ export default function ContactTableRow({
     ruc,
     name,
     empleados,
-    c_activo,
+    isActive,
     email,
     phone,
     sector,
@@ -50,7 +51,6 @@ export default function ContactTableRow({
     ubication
   } = row;
   const confirm = useBoolean();
-
   const popover = usePopover();
 
   return (
@@ -85,8 +85,8 @@ export default function ContactTableRow({
           
         </TableCell>
         <TableCell align="center">
-        <Label variant="soft" color={c_activo ? 'info' : 'warning'}>
-            {c_activo ? 'Activo' : 'Inactivo'}
+        <Label variant="soft" color={isActive ? 'info' : 'warning'}>
+            {isActive ? 'Activo' : 'Inactivo'}
           </Label>
         </TableCell>
 
@@ -104,7 +104,7 @@ export default function ContactTableRow({
       >
         <MenuItem
           onClick={() => {
-            // onEditRow(row.id.toString());
+            onEditRow(row.id.toString(), row.isPerson);
             popover.onClose();
           }}
           sx={{ color: '#1EAAE7' }}

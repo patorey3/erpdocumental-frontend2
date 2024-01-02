@@ -95,5 +95,12 @@ export const getIdentityDocumentType = async () => {
   return response.data.data;
 };
 
-export const createContact = async (contactReg: any) =>
-  instance.post(`${contactEndpoint}`, contactReg);
+export const createContact = async (contactReg: any) => {
+  const response = await instance.post(`${contactEndpoint}`, contactReg);
+  return response.data;
+};
+
+export const updateContactById = async (id: string, contactReg: any) => {
+  const response = await instance.put(`${contactEndpoint}/${id}`, contactReg);
+  return response.data;
+};

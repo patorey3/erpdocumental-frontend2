@@ -11,36 +11,72 @@ import { LoadingButton } from '@mui/lab';
 import { DatePicker } from '@mui/x-date-pickers';
 import { Box, Card, Grid, MenuItem, TextField, Typography, Autocomplete } from '@mui/material';
 
-import { useMutationCreateContact } from 'src/hooks/use-contact';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useMutationCreateContact, useMutationUpdateContact } from 'src/hooks/use-contact';
 import { useIdentityDocumentType, useCatalogCitiesCollectionByName } from 'src/hooks/use-catalog';
 
 import FormProvider, { RHFSelect, RHFCheckbox, RHFTextField } from 'src/components/hook-form';
 
 import { IContactPerson } from 'src/types/contact';
 
-// type CountryData = {
-//   latlng: number[];
-//   address: string;
-//   phoneNumber: string;
-// };
-
 type Props = {
   currentContact?: IContactPerson;
 };
 
+const emptyPerson: IContactPerson = {
+    id: 0,
+    identityDocumentTypeId: '0',
+    name: '0',
+    cC_RUC_DNI: '0',
+    cityId: '0',
+    address: '0',
+    movilPhone: '0',
+    phone: '0',
+    emailBilling: '0',
+    dateOfBirth: '0',
+    isPerson: false,
+    isActive: false,
+    priceList: '0',
+    created: '0',
+    parentContactId: 0,
+    c_oficina: '0',
+    c_cargo: '0',
+    emailCompany: '0',
+    esFabricante: false,
+    c_proveedor_servicios: false,
+    c_proveedor_mercaderia: false,
+    c_distribuidor: false,
+    phone2: '',
+    phone3: '',
+    canHasCredit: false,
+    creditAmount: 0,
+    daysOfCredit: 0,
+    additionalInformation: ''
+  }
+
+
 export default function ContacNewPerson({ currentContact }: Props) {
+  const loadingSave = useBoolean();
   const queryTypeDocument = useIdentityDocumentType();
   const [documentsType, setDocumentsType] = useState([]);
 
   const [cityValue, setCityValue] = useState('');
-  const [contact, setContact] = useState();
+  const [contact, setContact] = useState<IContactPerson>(emptyPerson);
   const [codeCity, setCodeCity] = useState('c05010101');
   const [debouncedCityValue, setDebouncedCityValue] = useState<string>(cityValue);
   const [citiesList, setCitiesList] = useState<any[]>([]);
-  console.log('codeCity',codeCity)
+  console.log('codeCity',codeCity, contact)
   const createContactMutation = useMutationCreateContact(
     contact
   );
+  const updateContactMutation = useMutationUpdateContact(
+    contact?.id.toString() ?? '0',
+    contact
+  );
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedCityValue(cityValue), 500);
@@ -70,12 +106,12 @@ export default function ContacNewPerson({ currentContact }: Props) {
     address: Yup.string().required('Dirección es requerida'),
     movilPhone: Yup.string(),
     phone: Yup.string(),
-    emailBilling: Yup.string(),
-    dateOfBirth: Yup.string(),
+    emailBilling: Yup.string().nullable(),
+    dateOfBirth: Yup.mixed<any>(),
     isPerson: Yup.boolean(),
-    c_activo: Yup.boolean(),
+    isActive: Yup.boolean(),
     priceList: Yup.string(),
-    dateOfCreation: Yup.string(),
+    created: Yup.mixed<any>(),
     parentContactId: Yup.number(),
     c_oficina: Yup.string(),
     c_cargo: Yup.string(),
@@ -84,8 +120,8 @@ export default function ContacNewPerson({ currentContact }: Props) {
     c_proveedor_servicios: Yup.boolean(),
     c_proveedor_mercaderia: Yup.boolean(),
     c_distribuidor: Yup.boolean(),
-    phone2: Yup.string(),
-    phone3: Yup.string(),
+    phone2: Yup.string().nullable(),
+    phone3: Yup.string().nullable(),
     canHasCredit: Yup.boolean(),
     creditAmount: Yup.number(),
     daysOfCredit: Yup.number(),
@@ -103,11 +139,15 @@ export default function ContacNewPerson({ currentContact }: Props) {
       movilPhone: currentContact?.movilPhone ?? '',
       phone: currentContact?.phone ?? '',
       emailBilling: currentContact?.emailBilling ?? '',
-      dateOfBirth: currentContact?.dateOfBirth ?? '',
+      dateOfBirth: currentContact?.dateOfBirth
+      ? new Date(currentContact.dateOfBirth)
+      : new Date(),
       isPerson: currentContact?.isPerson ?? true,
-      c_activo: currentContact?.c_activo ?? true,
+      isActive: currentContact?.isActive ?? true,
       priceList: currentContact?.priceList ?? '',
-      dateOfCreation: currentContact?.dateOfCreation ?? '',
+      created: currentContact?.created
+      ? new Date(currentContact.created)
+      : new Date(),
       parentContactId: currentContact?.parentContactId ?? 0,
       c_oficina: currentContact?.c_oficina ?? '',
       c_cargo: currentContact?.c_cargo ?? '',
@@ -132,7 +172,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
   });
 
   const {
-    //  reset,
+    reset,
     //  clearErrors,
     watch,
     //  trigger,
@@ -146,7 +186,32 @@ export default function ContacNewPerson({ currentContact }: Props) {
   useEffect(() => {
     if (currentContact) {
       setValue('id', currentContact.id);
-
+      setValue('name', currentContact.name);
+      setValue('identityDocumentTypeId', currentContact.identityDocumentTypeId);
+      setValue('address', currentContact.address);
+      setValue('cC_RUC_DNI', currentContact.cC_RUC_DNI);
+      setValue('cityId', currentContact.cityId);
+      setValue('movilPhone', currentContact.movilPhone);
+      setValue('isPerson', currentContact.isPerson);
+      setValue('isActive', currentContact.isActive);
+      setValue('dateOfBirth', new Date(currentContact.dateOfBirth ?? new Date()));
+      setValue('emailBilling', currentContact.emailBilling);
+      setValue('phone2', currentContact.phone2);
+      setValue('phone3', currentContact.phone3);
+      setValue('emailCompany', currentContact.emailCompany);
+      setValue('esFabricante', currentContact.esFabricante);
+      setValue('c_proveedor_servicios', currentContact.c_proveedor_servicios);
+      setValue('c_proveedor_mercaderia', currentContact.c_proveedor_mercaderia);
+      setValue('c_distribuidor', currentContact.c_distribuidor);
+      setValue('canHasCredit', currentContact.canHasCredit);
+      setValue('creditAmount', currentContact.creditAmount);
+      setValue('daysOfCredit', currentContact.daysOfCredit);
+      setValue('created', new Date(currentContact.created ?? new Date()));
+      setValue('additionalInformation', currentContact.additionalInformation);
+      
+      
+      // setValue('created', currentContact.created);
+      
       // trigger()
     }
 
@@ -154,18 +219,87 @@ export default function ContacNewPerson({ currentContact }: Props) {
   }, [currentContact]);
 
   useEffect(() => {
+    if(createContactMutation.isSuccess){ 
+      reset();
+      loadingSave.onFalse();
+      router.push(paths.dashboard.contact.root);
+
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createContactMutation])
+
+  useEffect(() => {
+    if(updateContactMutation.isSuccess){ 
+      reset();
+      loadingSave.onFalse();
+      router.push(paths.dashboard.contact.root);
+
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateContactMutation])
+  
+
+  useEffect(() => {
     if (queryTypeDocument.isFetched) {
       setDocumentsType(queryTypeDocument.data);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryTypeDocument.data]);
-  console.log('Values', values);
 
   const handleSaveContact = handleSubmit(async (data: any) => {
-    // console.info('DATA', JSON.stringify(data, null, 2));
-    console.info('values', JSON.stringify(values, null, 2));
-    setContact(data);
-    createContactMutation.mutate(contact);
+
+    loadingSave.onTrue();
+    try {
+      console.info('DATA', JSON.stringify(data, null, 2));
+      console.info('values', JSON.stringify(data, null, 2),router,  );
+      const contactRegister  = {
+        "id": data.id,
+        "name": data.name,
+        "cC_RUC_DNI": data.cC_RUC_DNI,
+        "identityDocumentTypeId": data.identityDocumentTypeId,
+        "cityId": data.cityId,
+        "address": data.address,
+        "movilPhone": data.movilPhone,
+        "phone": data.phone,
+        "emailBilling": data.emailBilling,
+        "dateOfBirth": data.dateOfBirth,
+        "isPerson": data.isPerson,
+        "isActive": data.isActive,
+        "priceList": data.priceList,
+        "created": data.created,
+        "parentContactId": data.parentContactId,
+        "c_oficina": data.c_oficina,
+        "c_cargo": data.c_cargo,
+        "emailCompany": data.emailCompany,
+        "esFabricante": data.esFabricante,
+        "c_proveedor_servicios": data.c_proveedor_servicios,
+        "c_proveedor_mercaderia": data.c_proveedor_mercaderia,
+        "c_distribuidor": data.c_distribuidor ,
+        "phone2": data.phone2 ,
+        "phone3": data.phone3 ,
+        "canHasCredit": data.canHasCredit ,
+        "creditAmount": data.creditAmount ,
+        "daysOfCredit": data.daysOfCredit ,
+        "additionalInformation": data.additionalInformation,
+        "sectorId":   ""
+      }
+      setContact(contactRegister);
+      if(contactRegister.id === 0){
+        createContactMutation.mutate();
+      }else{
+        updateContactMutation.mutate(
+          contactRegister.id
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      loadingSave.onFalse();
+    }
+
+
+   // createContactMutation.mutate(contact);
+   // router.push(paths.dashboard.contact.root);
+
     /*
     const purchaseRegister : IPurchaseRegister = {
       id: data.documentId,
@@ -312,12 +446,12 @@ export default function ContacNewPerson({ currentContact }: Props) {
               <DatePicker
                 label="Fecha de Nacimiento"
                 format="dd/MM/yyyy"
+                value={values.dateOfBirth}
                 // onChange={handleFilterPurchaseDate}
                 slotProps={{
                   textField: {
                     fullWidth: true,
                     size: 'small',
-                    name: 'dateOfBirth',
                   },
                 }}
                 sx={{
@@ -333,7 +467,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
           </Grid>
           <Grid item xs={12} sm={5} md={2} style={{ paddingTop: '15px' }}>
             <Stack>
-              <RHFCheckbox name="c_activo" label="Contacto Activo" />
+              <RHFCheckbox name="isActive" label="Contacto Activo" checked={values.isActive} />
             </Stack>
           </Grid>
           <Grid item xs={12} sm={5} md={4} style={{ paddingTop: '15px' }}>
@@ -346,12 +480,13 @@ export default function ContacNewPerson({ currentContact }: Props) {
               <DatePicker
                 label="Fecha de Registro"
                 format="dd/MM/yyyy"
+                disabled
+                value={values.created}
                 // onChange={handleFilterPurchaseDate}
                 slotProps={{
                   textField: {
                     fullWidth: true,
                     size: 'small',
-                    name: 'dateOfRegister',
                   },
                 }}
                 sx={{
@@ -464,7 +599,7 @@ export default function ContacNewPerson({ currentContact }: Props) {
           <LoadingButton
             color="primary"
             variant="contained"
-            loading={isSubmitting}
+            loading={loadingSave.value && isSubmitting}
             onClick={handleSaveContact}
           >
             Guardar

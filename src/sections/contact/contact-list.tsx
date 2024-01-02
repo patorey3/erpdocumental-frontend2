@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Stack from '@mui/material/Stack';
 import { Box, Card, Table, Select, MenuItem, TableBody, TextField, InputLabel, FormControl, Autocomplete, TableContainer, InputAdornment, SelectChangeEvent } from '@mui/material';
+
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
 import { useSectorCatalog, useCatalogContact, useCatalogCitiesCollectionByName } from 'src/hooks/use-catalog';
 
@@ -31,6 +34,9 @@ const TABLE_HEAD = [
 
 
 export default function ContactList() {
+  const [isActive, setIsActive] = useState<boolean | string>("all");
+  const router = useRouter();
+
   const [filter, setFilter] = useState('');
   const [razonSocial, setRazonSocial] = useState('');
   const [debouncedRazonSocial, setDebouncedRazonSocial] = useState<string>(razonSocial);
@@ -62,7 +68,11 @@ export default function ContactList() {
       setTipoContacto(event.target.value);
     }
   };
-
+  const onChangeIsActive= (event: SelectChangeEvent<unknown>) => {
+    if(event.target.value===true || event.target.value===false || event.target.value==="all" ){
+      setIsActive(event.target.value);
+    }
+  };
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSectorValue(sectorValue), 500);
 
@@ -84,9 +94,11 @@ export default function ContactList() {
     const parTipoContacto = tipoContacto==="all" ? "" : `&isPerson=${tipoContacto}`;
     const CityId = codeCity==="" ? "" : `&CityId=${codeCity}`;
     const SectorId = codeSector==="" ? "" : `&SectorId=${codeSector}`;
-    setFilter(`&Name=${debouncedRazonSocial}${parTipoContacto}${CityId}${SectorId}`)
+    const IsActive = isActive==="all" ? "" : `&isActive=${isActive}`;
+
+    setFilter(`&Name=${debouncedRazonSocial}${parTipoContacto}${CityId}${SectorId}${IsActive}`)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedRazonSocial, tipoContacto,codeCity,codeSector])
+  }, [debouncedRazonSocial, tipoContacto,codeCity,codeSector, isActive])
   
 
   useEffect(() => {
@@ -102,7 +114,7 @@ export default function ContactList() {
          empleados: contact.employees,
          sector: contact.sector ? contact.sector.name : 'SIN SECTOR',
          isPerson: contact.isPerson,
-         c_activo: contact.c_activo,
+         isActive: contact.isActive,
          ubication: contact.city.name
        }));
       setContactList(initResult);
@@ -149,6 +161,20 @@ export default function ContactList() {
     }
   };
 
+  const handleEditContact = useCallback(
+    (id: string, isPerson: boolean) => {
+      if(isPerson){
+        console.log(paths.dashboard.contact.editperson(id))
+         router.push(paths.dashboard.contact.editperson(id));
+      }else{
+        console.log(isPerson);
+      }
+    },
+    [router]
+  );
+  // const handleEditContact = (id:string, isPerson: boolean) => {
+  //   console.log('handleEditContact', id, isPerson);
+  // }
 
 
 // if(queryCatalog.isLoading)  {
@@ -159,7 +185,7 @@ export default function ContactList() {
   return (
     <Card style={{ marginTop: '15px', marginBottom: '15px' }}>
       <Stack
-        spacing={2}
+        spacing={1}
         alignItems={{ xs: 'flex-end', md: 'center' }}
         direction={{
           xs: 'column',
@@ -176,6 +202,7 @@ export default function ContactList() {
             name="id-razon-social"
             label="Razón Social"
             variant="outlined"
+            style={{ width: '250px' }}
             autoFocus
             value={razonSocial}
             onChange={handleInputChange}
@@ -195,6 +222,7 @@ export default function ContactList() {
             labelId="id-tipo-contacto"
             id="tipo-contacto"
             name="tipo-contacto"
+            style={{ width: '250px' }}
             size="small"
             value={tipoContacto}
             label="Tipo Contacto"
@@ -206,11 +234,12 @@ export default function ContactList() {
           </Select>
         </FormControl>
         <FormControl fullWidth>
-        <Autocomplete
+          <Autocomplete
             disablePortal
             id="combo-ubicacion"
+            style={{ width: '250px' }}
             size="small"
-            onChange={(event, newVal)=> setCodeCity(newVal.id)}
+            onChange={(event, newVal) => setCodeCity(newVal.id)}
             getOptionLabel={(option) => option.name}
             options={citiesList}
             groupBy={(option) => option.parentId}
@@ -220,7 +249,15 @@ export default function ContactList() {
               </Box>
             )}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Ubicación" name="ubicacion" value={cityValue} onChange={(e: any)=>setCityValue(e.target.value)} />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Ubicación"
+                name="ubicacion"
+                value={cityValue}
+                onChange={(e: any) => setCityValue(e.target.value)}
+              />
+            )}
           />
         </FormControl>
         <FormControl fullWidth>
@@ -228,7 +265,8 @@ export default function ContactList() {
             disablePortal
             id="combo-sector"
             size="small"
-            onChange={(event, newVal)=>setCodeSector(newVal.id)}
+            style={{ width: '250px' }}
+            onChange={(event, newVal) => setCodeSector(newVal.id)}
             getOptionLabel={(option) => option.name}
             options={sectorList}
             groupBy={(option) => option.parentId}
@@ -238,13 +276,36 @@ export default function ContactList() {
               </Box>
             )}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Sector Económico"             name="sector" value={sectorValue} onChange={(e: any)=>setSectorValue(e.target.value)} />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Sector Económico"
+                name="sector"
+                value={sectorValue}
+                onChange={(e: any) => setSectorValue(e.target.value)}
+              />
+            )}
           />
         </FormControl>
+        <FormControl fullWidth>
+          <InputLabel id="id-is-active">Status</InputLabel>
+          <Select
+            labelId="id-is-active"
+            id="is-active"
+            name="is-active"
+            size="small"
+            style={{ width: '100px' }}
+            value={isActive}
+            label="Status"
+            onChange={onChangeIsActive}
+          >
+            <MenuItem value="all">Todas</MenuItem>
+            <MenuItem value={true as any}>Activo</MenuItem>
+            <MenuItem value={false as any}>Inactivo</MenuItem>
+          </Select>
+        </FormControl>
       </Stack>
-      {
-        queryCatalog.isLoading && <LoadingScreen />
-      }
+      {queryCatalog.isLoading && <LoadingScreen />}
       <TableContainer sx={{ position: 'relative', overflow: 'unset', backgroundColor: '#FFFFFF' }}>
         <Scrollbar>
           <Table size={table.dense ? 'small' : 'medium'} sx={{ maxWidth: '100%' }}>
@@ -258,7 +319,12 @@ export default function ContactList() {
             />
             <TableBody>
               {tableData.map((row, index) => (
-                <ContactTableRow row={row} rowNumber={(page - 1) * 10 + index + 1} />
+                <ContactTableRow
+                  row={row}
+                  key={row.id}
+                  rowNumber={(page - 1) * 10 + index + 1}
+                  onEditRow={(contactId, isPerson) => handleEditContact(contactId, isPerson)}
+                />
               ))}
             </TableBody>
           </Table>
