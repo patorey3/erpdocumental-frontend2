@@ -85,7 +85,7 @@ export default function ContactView() {
               <MenuItem onClick={handleClose}>
               <Button
                   component={RouterLink}
-                  href={paths.dashboard.purchase.new}
+                  href={paths.dashboard.contact.enterprise}
                   color="inherit"
                   sx={{
                     alignItems: 'center',

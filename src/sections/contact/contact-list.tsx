@@ -167,7 +167,7 @@ export default function ContactList() {
         console.log(paths.dashboard.contact.editperson(id))
          router.push(paths.dashboard.contact.editperson(id));
       }else{
-        console.log(isPerson);
+        router.push(paths.dashboard.contact.editenterprise(id));
       }
     },
     [router]

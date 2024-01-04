@@ -61,7 +61,9 @@ const PurchaseEditPage = lazy(() => import('src/pages/dashboard/purchase/edit'))
 // CONTACT
 const ContactListPage = lazy(() => import('src/pages/dashboard/contact/list'));
 const ContacNewPersonPage = lazy(() => import('src/pages/dashboard/contact/person'));
+const ContacNewEnterprisePage = lazy(() => import('src/pages/dashboard/contact/enterprise'));
 const ContactEditPersonPage = lazy(() => import('src/pages/dashboard/contact/edit'));
+const ContactEditEnterprisePage = lazy(() => import('src/pages/dashboard/contact/edit-enterprise'));
 
 
 // FILE MANAGER
@@ -114,8 +116,10 @@ export const dashboardRoutes = [
         children: [
           { element: <ContactListPage />, index: true },
           { path: 'new-person', element: <ContacNewPersonPage /> },
+          { path: 'new-enterprise', element: <ContacNewEnterprisePage /> },
           { path: 'list', element: <UserListPage /> },
           { path: ':id/edit-person', element: <ContactEditPersonPage /> },      
+          { path: ':id/edit-enterprise', element: <ContactEditEnterprisePage /> },      
         ],
       },      
       {

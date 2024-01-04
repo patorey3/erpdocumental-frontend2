@@ -43,6 +43,34 @@ export interface IContactPerson {
   additionalInformation: string;
 }
 
+export interface IContactEnterprise {
+  id: number;
+  identityDocumentTypeId: string;
+  name: string;
+  cC_RUC_DNI: string;
+  cityId: string;
+  address: string;
+  phone: string;
+  emailBilling: string;
+  isPerson: boolean;
+  isActive: boolean;
+  clientGroupId: string;
+  created: string | null;
+  emailCompany: string;
+  c_web: string;
+  esFabricante: boolean;
+  c_proveedor_servicios: boolean;
+  c_proveedor_mercaderia: boolean;
+  c_distribuidor: boolean;
+  phone2: string;
+  phone3: string;
+  canHasCredit: boolean;
+  creditAmount: number;
+  daysOfCredit: number;
+  additionalInformation: string;
+  sectorId: string;
+}
+
 export interface IContactPersonResponse {
   isPerson: boolean;
   sectorId: string;

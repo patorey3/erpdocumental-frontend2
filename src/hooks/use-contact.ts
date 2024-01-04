@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { createContact, updateContactById, getEnterpriseInfoRQ } from 'src/api/catalogs/catalog';
 
-import { IContactPerson } from 'src/types/contact';
+import { IContactPerson, IContactEnterprise } from 'src/types/contact';
 
 const key = 'contact';
 
@@ -18,7 +18,7 @@ export const useEnterpriseInfo = (enterpriseId: string) =>
     queryFn: getEnterpriseInfoRQ,
   });
 
-export const useMutationCreateContact = (contactReg: IContactPerson) => {
+export const useMutationCreateContact = (contactReg: IContactPerson | IContactEnterprise) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -45,7 +45,10 @@ export const useMutationCreateContact = (contactReg: IContactPerson) => {
   });
 };
 
-export const useMutationUpdateContact = (id: string, contactReg: IContactPerson) => {
+export const useMutationUpdateContact = (
+  id: string,
+  contactReg: IContactPerson | IContactEnterprise
+) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => updateContactById(id, contactReg),
