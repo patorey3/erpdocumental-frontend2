@@ -100,7 +100,7 @@ export function useNavData() {
             icon: ICONS.user,
             children: [
               { title: t('contacts'), path: paths.dashboard.contact.root },
-              { title: t('crm_docs'), path: paths.dashboard.contact.list },
+              { title: t('crm_docs'), path: paths.dashboard.crm.list },
               { title: t('docs_flows'), path: paths.dashboard.contact.list },
               // { title: t('list'), path: paths.dashboard.user.list },
               // { title: t('create'), path: paths.dashboard.user.new },

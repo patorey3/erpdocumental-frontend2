@@ -64,6 +64,8 @@ const ContacNewPersonPage = lazy(() => import('src/pages/dashboard/contact/perso
 const ContacNewEnterprisePage = lazy(() => import('src/pages/dashboard/contact/enterprise'));
 const ContactEditPersonPage = lazy(() => import('src/pages/dashboard/contact/edit'));
 const ContactEditEnterprisePage = lazy(() => import('src/pages/dashboard/contact/edit-enterprise'));
+// CRM
+const CrmListPage = lazy(() => import('src/pages/dashboard/crm/list'));
 
 
 // FILE MANAGER
@@ -122,6 +124,13 @@ export const dashboardRoutes = [
           { path: ':id/edit-enterprise', element: <ContactEditEnterprisePage /> },      
         ],
       },      
+      {
+        path: 'crm',
+        children: [
+          { element: <CrmListPage />, index: true },
+          { path: 'list', element: <CrmListPage /> },
+        ],
+      },  
       {
         path: 'product',
         children: [
