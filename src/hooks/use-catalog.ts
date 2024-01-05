@@ -4,6 +4,7 @@ import {
   getSectorListRQ,
   getContactListRQ,
   getCatalogCitiesRQ,
+  getClientGroupListRQ,
   getAllDocumentModelType,
   getItemsPurchasesByName,
   getIdentityDocumentType,
@@ -23,7 +24,7 @@ const key_item_by_barcode = 'catalog-item-barcode';
 const key_item_by_name = 'catalog-item-name';
 const key_sector = 'catalog-sector';
 const key_document = 'catalog-document';
-
+const key_group_list = 'catalog-group-list';
 export const useListDocCatalog = (invoiceType: string) =>
   useQuery({
     queryKey: [key, invoiceType],
@@ -50,6 +51,13 @@ export const useSectorCatalog = (name: string = '') =>
     queryKey: [key_sector, name],
     enabled: name !== '',
     queryFn: getSectorListRQ,
+    staleTime: Infinity,
+  });
+
+export const useClientGroupListCatalog = () =>
+  useQuery({
+    queryKey: [key_group_list],
+    queryFn: getClientGroupListRQ,
     staleTime: Infinity,
   });
 

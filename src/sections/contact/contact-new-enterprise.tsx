@@ -16,11 +16,13 @@ import { useRouter } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useMutationCreateContact, useMutationUpdateContact } from 'src/hooks/use-contact';
-import { useSectorCatalog, useIdentityDocumentType, useCatalogCitiesCollectionByName } from 'src/hooks/use-catalog';
+import { useSectorCatalog, useIdentityDocumentType, useClientGroupListCatalog, useCatalogCitiesCollectionByName } from 'src/hooks/use-catalog';
 
 import FormProvider, { RHFSelect, RHFCheckbox, RHFTextField } from 'src/components/hook-form';
 
 import { IContactEnterprise } from 'src/types/contact';
+
+import { DAYS_OF_CREDITS } from './constants/constants';
 
 type Props = {
   currentContact?: IContactEnterprise;
@@ -58,7 +60,9 @@ const emptyPerson: IContactEnterprise = {
 export default function ContacNewEnterprise({ currentContact }: Props) {
   const loadingSave = useBoolean();
   const queryTypeDocument = useIdentityDocumentType();
+  const queryClientGroupCatalog = useClientGroupListCatalog();
   const [documentsType, setDocumentsType] = useState([]);
+  const [clientGroup, setClientGroup] = useState([]);
 
   const [sectorValue, setSectorValue] = useState('');
   const [debouncedSectorValue, setDebouncedSectorValue] = useState<string>(sectorValue);
@@ -113,6 +117,13 @@ export default function ContacNewEnterprise({ currentContact }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryCities.data]);
+
+  useEffect(() => {
+    if (queryClientGroupCatalog.isFetched) {
+      setClientGroup(queryClientGroupCatalog.data.data)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryClientGroupCatalog.data]);
 
   const NewContactSchema = Yup.object().shape({
     id: Yup.number(),
@@ -217,6 +228,7 @@ export default function ContacNewEnterprise({ currentContact }: Props) {
       setValue('additionalInformation', currentContact.additionalInformation);
       setValue('c_web', currentContact.c_web);
       setValue('sectorId', currentContact.sectorId);
+      setValue('clientGroupId', currentContact.clientGroupId);
       
       
       
@@ -471,7 +483,21 @@ export default function ContacNewEnterprise({ currentContact }: Props) {
           </Grid>
           <Grid item xs={12} sm={5} md={4} style={{ paddingTop: '15px' }}>
             <Stack>
-              <RHFTextField name="clientGroupId" label="Grupo de Cliente / Precio Venta al Público" />
+              <RHFSelect
+                size="small"
+                style={{ width: '100%' }}
+                name="clientGroupId"
+                label="Grupo de Cliente / Precio Venta al Público"
+                InputLabelProps={{ shrink: true }}
+                PaperPropsSx={{ textTransform: 'capitalize' }}
+                value={values.clientGroupId}
+              >
+                {clientGroup.map((option: any) => (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.name}/{option.priceList.description}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
             </Stack>
           </Grid>
           <Grid item xs={12} sm={5} md={2} style={{ paddingTop: '15px' }}>
@@ -590,7 +616,21 @@ export default function ContacNewEnterprise({ currentContact }: Props) {
           </Grid>       
           <Grid item xs={12} sm={5} md={3} >
             <Stack>
-              <RHFTextField type='number' name="daysOfCredit" label="Plazo Máximo" />
+              <RHFSelect
+                size="small"
+                style={{ width: '100%' }}
+                name="daysOfCredit"
+                label="Plazo Máximo (Días)"
+                InputLabelProps={{ shrink: true }}
+                PaperPropsSx={{ textTransform: 'capitalize' }}
+                value={values.daysOfCredit}
+              >
+                {DAYS_OF_CREDITS.map((option: any) => (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
             </Stack>
           </Grid>  
           <Grid item xs={12} sm={5} md={10} style={{ paddingTop: '15px' }}>

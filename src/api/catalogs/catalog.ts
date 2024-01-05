@@ -77,6 +77,13 @@ export const getSectorListRQ = async (queryKey: any) => {
   return response.data;
 };
 
+export const getClientGroupListRQ = async () => {
+  const response = await instance.get(
+    `${partnerCollectionEndpoint}/clientGroupCollection?IsGroupClient=true`
+  );
+  return response.data;
+};
+
 export const getEnterpriseInfoRQ = async (queryKey: any) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, enterpriseId] = queryKey.queryKey;
